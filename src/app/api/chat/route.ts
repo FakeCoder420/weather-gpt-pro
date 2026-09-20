@@ -122,21 +122,19 @@ async function generateAgronomyFallback(userPrompt: string): Promise<string> {
 function streamTextResponse(text: string): Response {
   const stream = new ReadableStream({
     start(controller) {
-      // Stream in small chunks to feel real-time
+      const id = "msg-" + Date.now();
+      controller.enqueue({ type: "start" });
+      controller.enqueue({ type: "text-start", id });
+
       const words = text.split(" ");
-      let i = 0;
-      function pushChunk() {
-        if (i < words.length) {
-          const chunk = (i === 0 ? "" : " ") + words[i];
-          controller.enqueue({ type: "text-delta", textDelta: chunk });
-          i++;
-          pushChunk();
-        } else {
-          controller.enqueue({ type: "finish" });
-          controller.close();
-        }
+      for (let i = 0; i < words.length; i++) {
+        const chunk = (i === 0 ? "" : " ") + words[i];
+        controller.enqueue({ type: "text-delta", id, delta: chunk });
       }
-      pushChunk();
+
+      controller.enqueue({ type: "text-end", id });
+      controller.enqueue({ type: "finish" });
+      controller.close();
     },
   });
 
