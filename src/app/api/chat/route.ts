@@ -1,8 +1,20 @@
 import { streamText, tool, convertToModelMessages, isStepCount } from "ai";
-import { google } from "@ai-sdk/google";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { z } from "zod";
 
 export const maxDuration = 30;
+
+const rawKey =
+  process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+  process.env.GOOGLE_API_KEY ||
+  process.env.GEMINI_API_KEY ||
+  "";
+
+const apiKey = rawKey.replace(/^["']|["']$/g, "").trim();
+
+const google = createGoogleGenerativeAI({
+  apiKey: apiKey || undefined,
+});
 
 interface IncomingPart {
   type: string;
