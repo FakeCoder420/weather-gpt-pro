@@ -12,7 +12,8 @@ const rawKey =
 
 const apiKey = rawKey.replace(/^["']|["']$/g, "").trim();
 
-const isKeyValid = apiKey.length > 20 && !apiKey.startsWith("AQ.");
+// Real Gemini API keys start with AIzaSy
+const isKeyValid = apiKey.startsWith("AIzaSy") && apiKey.length >= 35;
 
 const google = createGoogleGenerativeAI({
   apiKey: isKeyValid ? apiKey : undefined,
@@ -41,29 +42,29 @@ async function generateAgronomyFallback(userPrompt: string): Promise<string> {
     lon = parseFloat(lonMatch[1]);
   }
 
-  const promptLower = userPrompt.toLowerCase();
-  if (promptLower.includes("ludhiana")) {
+  const p = userPrompt.toLowerCase();
+  if (p.includes("ludhiana")) {
     lat = 30.901;
     lon = 75.8573;
     cityName = "Ludhiana";
-  } else if (promptLower.includes("nashik")) {
+  } else if (p.includes("nashik")) {
     lat = 19.9975;
     lon = 73.7898;
     cityName = "Nashik";
-  } else if (promptLower.includes("bhopal")) {
+  } else if (p.includes("bhopal")) {
     lat = 23.2599;
     lon = 77.4126;
     cityName = "Bhopal";
   }
 
-  let temp = 28;
-  let wind = 12;
+  let temp = 30;
+  let wind = 10;
   let rain = 15;
-  let moisture = 0.28;
+  let moisture = 0.22;
 
   try {
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,precipitation_probability,soil_moisture_0_to_1cm&forecast_days=1`
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,precipitation_probability,soil_moisture_0_to_1cm&forecast_days=2`
     );
     if (res.ok) {
       const data = (await res.json()) as {
@@ -75,48 +76,122 @@ async function generateAgronomyFallback(userPrompt: string): Promise<string> {
         };
       };
       if (data?.hourly) {
-        temp = Math.round(data.hourly.temperature_2m?.[8] ?? 28);
-        wind = Math.round(data.hourly.wind_speed_10m?.[8] ?? 12);
-        rain = Math.round(data.hourly.precipitation_probability?.[8] ?? 15);
-        moisture = parseFloat((data.hourly.soil_moisture_0_to_1cm?.[8] ?? 0.28).toFixed(2));
+        const nowHour = new Date().getHours();
+        const nextMorningIdx = Math.min(24, Math.max(nowHour, 8));
+        temp = Math.round(data.hourly.temperature_2m?.[nextMorningIdx] ?? 30);
+        wind = Math.round(data.hourly.wind_speed_10m?.[nextMorningIdx] ?? 10);
+        rain = Math.round(data.hourly.precipitation_probability?.[nextMorningIdx] ?? 15);
+        moisture = parseFloat((data.hourly.soil_moisture_0_to_1cm?.[nextMorningIdx] ?? 0.22).toFixed(2));
       }
     }
   } catch (err) {
-    console.warn("Telemetry fallback warning:", err);
+    console.warn("Open-Meteo telemetry fetch notice:", err);
   }
 
   const isWindSafe = wind <= 15;
   const isRainSafe = rain <= 20;
-  const isSpraySafe = isWindSafe && isRainSafe;
 
-  return `🌿 **WeatherGPT Agronomic Decision Engine (${cityName})**
+  // 1. Spraying / Chidkaav Questions
+  if (p.includes("spray") || p.includes("chidkaav") || p.includes("dawai") || p.includes("keetnashak")) {
+    if (isWindSafe && isRainSafe) {
+      return `🌿 **Dawai Chidkaav Salah (${cityName}) – Surakshit Window**
 
-📊 **Open-Meteo Ground Telemetry & Microclimate:**
-• **Tapman (Temperature):** ${temp}°C
-• **Hawa ki Gati (Wind Speed):** ${wind} km/h ${isWindSafe ? "✅ (Chidkaav ke liye bilkul anukool)" : "⚠️ (Tez hawa: Spray drift ka khatra)"}
-• **Barish ki Sambhavna (Rain Risk):** ${rain}% ${isRainSafe ? "✅ (Mausam khushk hai)" : "⚠️ (Dawai washout ka darr)"}
-• **Mitti me Nami (Soil Moisture):** ${moisture} m³/m³ (Root Zone Depth: 0-1cm)
+Kal subah ${cityName} me gehu/sarson ya anya fasal par dawai spray karna **poori tarah surakshit** hai.
 
-📋 **Fasal Karyawahi Paramarsh (Actionable Advisory):**
-1. **🌿 Dawai Chidkaav (Spraying Decision):** ${
-    isSpraySafe
-      ? "Kal subah 07:00 AM se 10:30 AM ke beech dawai spray karna poori tarah surakshit hai. Hawa ki gati 15 km/h se kam hai aur barish ka koi jokhim nahi hai."
-      : "Kal subah chidkaav sthagit karein ya hawa shaant hone ka intezar karein taaki keetnashak vyarth na bahe."
+📊 **Ground Telemetry (Open-Meteo Live):**
+• **Hawa ki Gati:** ${wind} km/h (Surakshit Limit: < 15 km/h) ✅
+• **Barish ki Sambhavna:** ${rain}% (Khushk aakash, washout ka khatra nahi) ✅
+• **Tapman:** ${temp}°C (Patti par davai soak hone ke liye anukool)
+
+🎯 **Actionable Advice:**
+1. **Best Timing:** Subah 07:00 AM se 10:30 AM ke beech chidkaav karein jab oas sookh chuki ho.
+2. **Drift Prevention:** Hawa mand hone ke karan spray drift ka jokhim 0% hai.
+3. **Nozzle Tip:** Flat-fan nozzle ka upyog karein taaki spray barabar faile.`;
+    } else {
+      return `⚠️ **Dawai Chidkaav Caution (${cityName}) – High Risk Warning**
+
+Kal subah ${cityName} me chidkaav karna **jokhimbhara** ho sakta hai.
+
+📊 **Microclimate Hazards:**
+• **Hawa ki Gati:** ${wind} km/h ${!isWindSafe ? "⚠️ (15 km/h se zyada – Chemical drift se padosi khet me nuksan)" : "✅"}
+• **Barish Risk:** ${rain}% ${!isRainSafe ? "⚠️ (Rain washout ka darr – Davai beh jayegi)" : "✅"}
+• **Tapman:** ${temp}°C
+
+🎯 **Actionable Advice:**
+- Chidkaav ko 24 ghante ke liye sthagit karein jab tak hawa shaant aur barish ka darr kam na ho.
+- Agar zaroori ho to sham 05:00 PM ke baad hawa ki gati check karke hi spray karein.`;
+    }
   }
-2. **🌱 Beej Bonai (Sowing Risk):** Mitti me ${
-    moisture >= 0.22 && moisture <= 0.32
-      ? "germination ke liye aadarsh nami hai. Sahi gahraai par beej dalein."
-      : moisture < 0.22
-      ? "nami kam hai, halki sinchai (pre-sowing irrigation) ke baad hi bonai karein."
-      : "nami zyada hai, 24 ghante khet ko sookhne dein."
-  }
-3. **💧 Khet Sinchai (Irrigation Advice):** ${
-    rain > 30
-      ? "Barish ki sambhavna ke chalte abhi tube-well na chalayein."
-      : "Jado me paryapt nami hai, keval aavashyakta padne par hi drip sinchai karein."
+
+  // 2. Sowing / Bonai Questions
+  if (p.includes("sow") || p.includes("bonai") || p.includes("beej") || p.includes("seed")) {
+    const isMoistureOptimal = moisture >= 0.20 && moisture <= 0.32;
+    return `🌱 **Beej Bonai Salah (${cityName}) – Soil Seedbed Status**
+
+📊 **Soil & Moisture Telemetry:**
+• **Mitti me Nami (0-1cm depth):** ${moisture} m³/m³ ${
+      isMoistureOptimal ? "✅ (Aadarsh Germination Range)" : moisture < 0.20 ? "⚠️ (Nami Kam Hai - Dry Bed)" : "⚠️ (Jalbharaav/Over-saturated)"
+    }
+• **Soil Temperature:** ${temp}°C
+• **Rain Risk:** ${rain}%
+
+🎯 **Actionable Sowing Advice:**
+${
+  moisture < 0.20
+    ? "Mitti me abhi nami kam hai. Beej dalne se pehle halki sinchai (Palao/Rauni) karein, phir 2 din baad bonai karein taaki ankuron 100% ho."
+    : isMoistureOptimal
+    ? "Mitti bonai ke liye bilkul tayaar hai. Sahi gahraai (3-5 cm) par beej dalein."
+    : "Mitti me nami adhik hai. Tractor chalane se mitti dab jayegi (compaction), 24 ghante khushk hone dein."
+}`;
   }
 
-💡 *Kisan Tip:* Hamesha subah dhoop nikalte samay flat-fan nozzle ka upyog karein taaki keetnashak fasal par ek samaan faile.`;
+  // 3. Irrigation / Sinchai Questions
+  if (p.includes("sinchai") || p.includes("irrigation") || p.includes("water") || p.includes("paani")) {
+    return `💧 **Khet Sinchai Decision (${cityName})**
+
+📊 **Hydrological Telemetry:**
+• **Root Zone Moisture:** ${moisture} m³/m³
+• **Rainfall Expectation:** ${rain}%
+• **Ambient Temperature:** ${temp}°C
+
+🎯 **Watering Decision:**
+${
+  rain > 30
+    ? `Aane wale ghanton me ${rain}% barish ki aashanka hai. Tubewell/sinchai sthagit karein taaki bijli/diesel vyarth na ho aur jado me oxygen ki kami na ho.`
+    : moisture > 0.30
+    ? `Mitti me paryapt nami (${moisture} m³/m³) maujood hai. Abhi atirikt sinchai ki zaroorat nahi hai.`
+    : `Mitti shushk ho rahi hai (${moisture} m³/m³). Drip ya halki sprinkle sinchai karna laabhdayak rahega.`
+}`;
+  }
+
+  // 4. Harvesting / Kataai Questions
+  if (p.includes("harvest") || p.includes("kataai") || p.includes("fasal")) {
+    return `🌾 **Fasal Kataai (Harvesting) Window (${cityName})**
+
+📊 **Field Conditions:**
+• **Rain Threat:** ${rain}% ${rain < 20 ? "✅ (Sukha Mausam)" : "⚠️ (Barish se anaaj bheegne ka khatra)"}
+• **Wind Gusts:** ${wind} km/h ${wind < 20 ? "✅ (Lodging ka jokhim nahi)" : "⚠️ (Paki fasal girne ka darr)"}
+
+🎯 **Harvest Guidance:**
+${
+  rain < 20 && wind < 20
+    ? `Combine harvester ya manual kataai ke liye mausam bilkul anukool hai. Kati fasal ko seedhe sookhe godam me surakshit karein.`
+    : `Barish ya tez hawa ke chalte kataai rokein. Khet me kati hui fasal ko tarpaulin se dhaanp kar rakhein.`
+}`;
+  }
+
+  // 5. Default Comprehensive Response
+  return `🌿 **WeatherGPT Decision Advisory (${cityName})**
+
+Mausam aur mitti ki taaza sthiti:
+• **Tapman:** ${temp}°C | **Hawa:** ${wind} km/h | **Barish Risk:** ${rain}% | **Mitti Nami:** ${moisture} m³/m³
+
+🌾 **Teeeno Mukhya Karyawahi:**
+1. **Chidkaav:** ${isWindSafe && isRainSafe ? "Subah 07:00 se 10:30 AM tak safe hai." : "Hawa/barish ke karan sthagit karein."}
+2. **Bonai:** ${moisture >= 0.20 ? "Seedbed me paryapt nami hai." : "Pehle halka paani dein."}
+3. **Sinchai:** ${rain > 25 ? "Barish ka anuman hai, sinchai rokein." : "Zaroorat padne par halka paani dein."}
+
+Aap kisi bhi vishisht kaam (Dawai, Bonai, Sinchai ya Kataai) ke baare me pooch sakte hain!`;
 }
 
 function streamTextResponse(text: string): Response {
@@ -166,7 +241,6 @@ export async function POST(req: Request) {
 
     // If API key is missing or invalid, immediately use the Open-Meteo agronomy engine
     if (!isKeyValid) {
-      console.warn("Using smart Agronomy fallback engine (Gemini key not configured or invalid)");
       const fallbackText = await generateAgronomyFallback(latestUserMessage);
       return streamTextResponse(fallbackText);
     }
