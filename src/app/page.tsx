@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
 import { motion, type Variants } from "framer-motion";
 import {
   AlertTriangle,
