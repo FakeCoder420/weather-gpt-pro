@@ -675,29 +675,29 @@ export default function AgRiskDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen bg-gradient-to-b from-[#082f20] via-[#052317] to-[#02130d] text-slate-100 flex flex-col antialiased selection:bg-emerald-600 selection:text-white relative">
       {/* Top Enterprise Navbar */}
       <motion.header
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs backdrop-blur-md bg-white/95"
+        className="bg-[#062418]/90 border-b border-emerald-800/40 sticky top-0 z-30 shadow-sm backdrop-blur-md"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="flex items-center space-x-3.5">
-            <div className="h-11 w-11 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-800 shadow-xs">
+            <div className="h-11 w-11 rounded-xl bg-emerald-900/60 border border-emerald-600/40 flex items-center justify-center text-emerald-400 shadow-xs">
               <Sprout className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white">
                   WeatherGPT
                 </h1>
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-200">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 shadow-xs">
                   Ag-Risk Decision Engine
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">
+              <p className="text-xs text-emerald-200/70 font-medium mt-0.5">
                 Precision Agronomy Advisory &bull; Open-Meteo Live Telemetry &bull; Powered by Gemini AI
               </p>
             </div>
@@ -709,21 +709,21 @@ export default function AgRiskDashboard() {
                 scale: [1, 1.025, 1],
                 boxShadow: [
                   "0 0 0 0 rgba(16, 185, 129, 0)",
-                  "0 0 0 3px rgba(16, 185, 129, 0.12)",
+                  "0 0 0 3px rgba(16, 185, 129, 0.2)",
                   "0 0 0 0 rgba(16, 185, 129, 0)",
                 ],
               }}
               transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut" }}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 border border-slate-200 text-xs text-slate-700 font-medium shadow-xs"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#083323] border border-emerald-700/50 text-xs text-emerald-100 font-medium shadow-xs"
             >
               <span
                 className={`w-2 h-2 rounded-full ${
-                  isFetchingWeather ? "bg-amber-500 animate-spin" : "bg-emerald-600 animate-pulse"
+                  isFetchingWeather ? "bg-amber-400 animate-spin" : "bg-emerald-400 animate-pulse"
                 }`}
               ></span>
               <span>{isFetchingWeather ? "Syncing Sensors..." : `${selectedCity.name} Live Sync`}</span>
             </motion.div>
-            <div className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-900">
+            <div className="px-3 py-1.5 rounded-lg bg-emerald-900/70 border border-emerald-600/40 text-xs font-semibold text-emerald-200 shadow-xs">
               Hinglish Kisan Sahayak
             </div>
           </div>
@@ -795,14 +795,14 @@ export default function AgRiskDashboard() {
         {/* 1. Activity Mode Selector */}
         <motion.section
           variants={itemVariants}
-          className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm"
+          className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-4 shadow-sm backdrop-blur-xs"
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600">
-              <Activity className="h-4 w-4 text-emerald-700" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-emerald-800/40">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-300">
+              <Activity className="h-4 w-4 text-emerald-400" />
               <span>Kisan Karyakram Chunein (Select Agricultural Activity):</span>
             </div>
-            <span className="text-xs text-slate-400 font-medium">
+            <span className="text-xs text-emerald-300/60 font-medium">
               Risk scores &amp; timelines automatically recalculate for chosen operation
             </span>
           </div>
@@ -820,44 +820,44 @@ export default function AgRiskDashboard() {
                   onClick={() => setSelectedActivity(act.id)}
                   className={`p-4 rounded-xl border text-left flex flex-col justify-between h-full gap-3 cursor-pointer transform hover:scale-[1.02] transition-transform duration-300 ${
                     isSelected
-                      ? "bg-emerald-50/90 border-emerald-600 text-emerald-950 shadow-sm ring-2 ring-emerald-600/20"
-                      : "bg-white hover:bg-slate-50/90 border-slate-200 text-slate-700 shadow-xs"
+                      ? "bg-gradient-to-br from-emerald-600 to-teal-700 border-emerald-400 text-white shadow-md ring-2 ring-emerald-400/30"
+                      : "bg-[#052116]/80 hover:bg-[#0c402b] border-emerald-800/50 text-emerald-100 shadow-xs"
                   }`}
                 >
                   <div className="flex items-start gap-3">
                     <div
                       className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
                         isSelected
-                          ? "bg-emerald-700 text-white shadow-xs"
-                          : "bg-slate-100 text-slate-700 border border-slate-200"
+                          ? "bg-white text-emerald-900 shadow-xs"
+                          : "bg-emerald-950/80 text-emerald-300 border border-emerald-700/40"
                       }`}
                     >
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-bold text-slate-900 tracking-tight leading-snug">
+                      <div className="text-sm font-bold text-white tracking-tight leading-snug">
                         {act.hindiTitle}
                       </div>
-                      <div className="text-xs text-slate-500 font-medium mt-0.5">
+                      <div className="text-xs text-emerald-200/70 font-medium mt-0.5">
                         {act.englishSubtitle}
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-2.5 border-t border-slate-100/90 flex items-center justify-between text-xs mt-auto">
-                    <span className="font-semibold text-slate-600">
+                  <div className="pt-2.5 border-t border-emerald-800/40 flex items-center justify-between text-xs mt-auto">
+                    <span className="font-semibold text-emerald-200/80">
                       Risk Score:{" "}
-                      <strong className="text-slate-900 text-sm font-black">
+                      <strong className="text-white text-sm font-black">
                         {evalData.score}/100
                       </strong>
                     </span>
                     <span
                       className={`px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider border ${
                         evalData.color === "rose"
-                          ? "bg-rose-50 text-rose-700 border-rose-200"
+                          ? "bg-rose-950/60 text-rose-300 border-rose-800/60"
                           : evalData.color === "amber"
-                          ? "bg-amber-50 text-amber-800 border-amber-200"
-                          : "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          ? "bg-amber-950/60 text-amber-300 border-amber-800/60"
+                          : "bg-emerald-950/60 text-emerald-300 border-emerald-700/60"
                       }`}
                     >
                       {evalData.level}
@@ -876,24 +876,24 @@ export default function AgRiskDashboard() {
         >
           {/* Card 1: Operational Risk Score */}
           <div
-            className={`border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden transition-colors duration-500 ${
+            className={`border border-emerald-800/60 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden transition-colors duration-500 ${
               activeEval.color === "rose"
-                ? "bg-gradient-to-br from-white via-rose-50/40 to-rose-100/30 animate-gradient-slow"
+                ? "bg-gradient-to-br from-[#12291e] via-[#211116] to-[#041a12] animate-gradient-slow"
                 : activeEval.color === "amber"
-                ? "bg-gradient-to-br from-white via-amber-50/40 to-amber-100/30 animate-gradient-slow"
-                : "bg-gradient-to-br from-white via-emerald-50/40 to-teal-100/30 animate-gradient-slow"
+                ? "bg-gradient-to-br from-[#12291e] via-[#231a0e] to-[#041a12] animate-gradient-slow"
+                : "bg-gradient-to-br from-[#0c3825] via-[#072d1e] to-[#041a12] animate-gradient-slow"
             }`}
           >
             <div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-slate-700 font-semibold text-sm">
+                <div className="flex items-center gap-2 text-emerald-200 font-semibold text-sm">
                   <ShieldAlert
                     className={`h-5 w-5 ${
                       activeEval.color === "rose"
-                        ? "text-rose-600"
+                        ? "text-rose-400"
                         : activeEval.color === "amber"
-                        ? "text-amber-600"
-                        : "text-emerald-700"
+                        ? "text-amber-400"
+                        : "text-emerald-400"
                     }`}
                   />
                   <span>Field Operational Hazard</span>
@@ -901,10 +901,10 @@ export default function AgRiskDashboard() {
                 <span
                   className={`px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider rounded-md border ${
                     activeEval.color === "rose"
-                      ? "bg-rose-50 text-rose-700 border-rose-200"
+                      ? "bg-rose-950/70 text-rose-300 border-rose-800/60"
                       : activeEval.color === "amber"
-                      ? "bg-amber-50 text-amber-800 border-amber-200"
-                      : "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      ? "bg-amber-950/70 text-amber-300 border-amber-800/60"
+                      : "bg-emerald-950/70 text-emerald-300 border-emerald-700/60"
                   }`}
                 >
                   {activeEval.level}
@@ -912,7 +912,7 @@ export default function AgRiskDashboard() {
               </div>
 
               <div className="mt-3.5">
-                <div className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight flex items-baseline gap-2">
+                <div className="text-3xl sm:text-4xl font-black text-white tracking-tight flex items-baseline gap-2">
                   <span>Operational Risk Score:</span>
                   <motion.span
                     animate={{
@@ -926,64 +926,64 @@ export default function AgRiskDashboard() {
                     }}
                     className={`inline-block font-black ${
                       activeEval.color === "rose"
-                        ? "text-rose-600"
+                        ? "text-rose-400"
                         : activeEval.color === "amber"
-                        ? "text-amber-600"
-                        : "text-emerald-700"
+                        ? "text-amber-400"
+                        : "text-emerald-400"
                     }`}
                   >
                     {activeEval.score}/100
                   </motion.span>
                 </div>
-                <div className="text-xs font-bold text-slate-800 mt-1.5">
+                <div className="text-xs font-bold text-white mt-1.5">
                   {activeEval.headline}
                 </div>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                <p className="text-xs text-emerald-200/80 mt-1 leading-relaxed">
                   {activeEval.rationale}
                 </p>
               </div>
 
               <div className="mt-4">
-                <div className="flex justify-between text-xs text-slate-500 font-medium mb-1.5">
+                <div className="flex justify-between text-xs text-emerald-300/70 font-medium mb-1.5">
                   <span>Safe (0)</span>
                   <span
                     className={`font-bold ${
                       activeEval.color === "rose"
-                        ? "text-rose-600"
+                        ? "text-rose-400"
                         : activeEval.color === "amber"
-                        ? "text-amber-600"
-                        : "text-emerald-700"
+                        ? "text-amber-400"
+                        : "text-emerald-400"
                     }`}
                   >
                     {activeEval.score}% {activeEval.level}
                   </span>
                   <span>Extreme (100)</span>
                 </div>
-                <div className="w-full h-3 bg-slate-100/90 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                <div className="w-full h-3 bg-emerald-950/90 rounded-full overflow-hidden p-0.5 border border-emerald-800/60">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min(100, Math.max(5, activeEval.score))}%` }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className={`h-full rounded-full ${
                       activeEval.color === "rose"
-                        ? "bg-rose-600"
+                        ? "bg-rose-500"
                         : activeEval.color === "amber"
-                        ? "bg-amber-500"
-                        : "bg-emerald-600"
+                        ? "bg-amber-400"
+                        : "bg-emerald-500"
                     }`}
                   />
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-200/70 flex items-start gap-2 text-xs text-slate-600">
+            <div className="mt-4 pt-3 border-t border-emerald-800/40 flex items-start gap-2 text-xs text-emerald-200">
               <AlertTriangle
                 className={`h-4 w-4 shrink-0 mt-0.5 ${
                   activeEval.color === "rose"
-                    ? "text-rose-600"
+                    ? "text-rose-400"
                     : activeEval.color === "amber"
-                    ? "text-amber-600"
-                    : "text-emerald-600"
+                    ? "text-amber-400"
+                    : "text-emerald-400"
                 }`}
               />
               <span className="font-medium leading-relaxed">{activeEval.actionGuidance}</span>
@@ -991,54 +991,54 @@ export default function AgRiskDashboard() {
           </div>
 
           {/* Card 2: Optimal Window Card */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden">
+          <div className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden backdrop-blur-xs">
             <div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-emerald-800 font-semibold text-sm">
-                  <CalendarCheck className="h-5 w-5 text-emerald-700" />
+                <div className="flex items-center gap-2 text-emerald-300 font-semibold text-sm">
+                  <CalendarCheck className="h-5 w-5 text-emerald-400" />
                   <span>Agronomy Recommendation</span>
                 </div>
-                <span className="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
+                <span className="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider rounded-md bg-emerald-900/80 text-emerald-300 border border-emerald-600/40">
                   Optimal Slot
                 </span>
               </div>
 
               <div className="mt-3.5">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <div className="text-xs font-semibold text-emerald-300/70 uppercase tracking-wider">
                   Target Activity: {selectedActivity.toUpperCase()} &bull; {selectedCity.name}
                 </div>
-                <div className="mt-2 p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200">
-                  <div className="text-base sm:text-lg font-bold text-emerald-950 tracking-tight flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-emerald-700 shrink-0" />
+                <div className="mt-2 p-3.5 rounded-xl bg-gradient-to-br from-emerald-900/60 to-[#06291b] border border-emerald-600/40">
+                  <div className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-emerald-400 shrink-0" />
                     <span>Optimal Window: {activeEval.optimalWindow}</span>
                   </div>
-                  <p className="text-xs text-emerald-900/80 mt-1.5 leading-relaxed">
+                  <p className="text-xs text-emerald-100 mt-1.5 leading-relaxed">
                     {activeEval.optimalRationale}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-              <span className="flex items-center gap-1.5 text-emerald-800 font-bold">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Safest: {activeEval.safestRange}
+            <div className="mt-4 pt-3 border-t border-emerald-800/40 flex items-center justify-between text-xs text-emerald-200">
+              <span className="flex items-center gap-1.5 text-emerald-300 font-bold">
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Safest: {activeEval.safestRange}
               </span>
-              <span className="text-slate-500 font-medium">
+              <span className="text-emerald-400/70 font-medium">
                 Verified by Open-Meteo
               </span>
             </div>
           </div>
 
           {/* Card 3: Ground Sensors & Telemetry */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col justify-between md:col-span-2 lg:col-span-1">
+          <div className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-5 shadow-sm flex flex-col justify-between md:col-span-2 lg:col-span-1 backdrop-blur-xs">
             <div>
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  <MapPin className="h-3.5 w-3.5 text-emerald-700" />
+                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-300 uppercase tracking-wider">
+                  <MapPin className="h-3.5 w-3.5 text-emerald-400" />
                   <span>Khet Location (City):</span>
                 </div>
                 {isFetchingWeather && (
-                  <span className="flex items-center gap-1 text-[11px] text-emerald-700 font-medium">
+                  <span className="flex items-center gap-1 text-[11px] text-emerald-300 font-medium">
                     <Loader2 className="h-3 w-3 animate-spin" /> Fetching...
                   </span>
                 )}
@@ -1055,8 +1055,8 @@ export default function AgRiskDashboard() {
                       onClick={() => handleSelectCity(city)}
                       className={`px-3 py-1 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                         isCityActive
-                          ? "bg-emerald-700 text-white border-emerald-800 shadow-xs ring-1 ring-emerald-700"
-                          : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                          ? "bg-emerald-600 text-white border-emerald-400 shadow-xs ring-1 ring-emerald-400"
+                          : "bg-[#052116] hover:bg-[#0c402b] text-emerald-200 border-emerald-800/60"
                       }`}
                     >
                       {city.name}
@@ -1066,62 +1066,62 @@ export default function AgRiskDashboard() {
               </div>
 
               {/* Station Info Header */}
-              <div className="flex items-center justify-between mb-3 pt-2 border-t border-slate-100">
-                <div className="flex items-center gap-2 text-slate-900 font-semibold text-sm">
-                  <Compass className="h-4 w-4 text-emerald-700" />
+              <div className="flex items-center justify-between mb-3 pt-2 border-t border-emerald-800/40">
+                <div className="flex items-center gap-2 text-white font-semibold text-sm">
+                  <Compass className="h-4 w-4 text-emerald-400" />
                   <span>{selectedCity.name}, {selectedCity.state}</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-mono bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                <span className="text-[11px] text-emerald-300 font-mono bg-[#052116] px-2 py-0.5 rounded border border-emerald-800/60">
                   {selectedCity.zone}
                 </span>
               </div>
 
               {/* Telemetry Sensor Mini-Cards */}
               <div className="grid grid-cols-2 gap-2.5">
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 transform hover:scale-[1.02] transition-transform duration-300 hover:shadow-xs hover:border-slate-300 cursor-default">
-                  <div className="text-[11px] text-slate-500 font-medium">Surface Temp (2m)</div>
-                  <div className="text-lg font-bold text-slate-900 mt-0.5">
+                <div className="bg-[#052116]/90 p-2.5 rounded-xl border border-emerald-800/60 transform hover:scale-[1.02] transition-transform duration-300 hover:shadow-xs hover:border-emerald-600/60 cursor-default">
+                  <div className="text-[11px] text-emerald-300/70 font-medium">Surface Temp (2m)</div>
+                  <div className="text-lg font-bold text-white mt-0.5">
                     {currentTelemetry.temperature.toFixed(1)} °C
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 transform hover:scale-[1.02] transition-transform duration-300 hover:shadow-xs hover:border-slate-300 cursor-default">
-                  <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-                    <Wind className="h-3 w-3 text-slate-400" /> Wind Gusts (10m)
+                <div className="bg-[#052116]/90 p-2.5 rounded-xl border border-emerald-800/60 transform hover:scale-[1.02] transition-transform duration-300 hover:shadow-xs hover:border-emerald-600/60 cursor-default">
+                  <div className="text-[11px] text-emerald-300/70 font-medium flex items-center gap-1">
+                    <Wind className="h-3 w-3 text-emerald-400" /> Wind Gusts (10m)
                   </div>
                   <div
                     className={`text-lg font-bold mt-0.5 ${
-                      currentTelemetry.windSpeed > 15 ? "text-rose-600" : "text-emerald-700"
+                      currentTelemetry.windSpeed > 15 ? "text-rose-400" : "text-emerald-400"
                     }`}
                   >
                     {currentTelemetry.windSpeed.toFixed(1)} km/h
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 transform hover:scale-[1.02] transition-transform duration-300 hover:shadow-xs hover:border-slate-300 cursor-default">
-                  <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-                    <Droplets className="h-3 w-3 text-slate-400" /> Soil Moisture (0-1cm)
+                <div className="bg-[#052116]/90 p-2.5 rounded-xl border border-emerald-800/60 transform hover:scale-[1.02] transition-transform duration-300 hover:shadow-xs hover:border-emerald-600/60 cursor-default">
+                  <div className="text-[11px] text-emerald-300/70 font-medium flex items-center gap-1">
+                    <Droplets className="h-3 w-3 text-blue-400" /> Soil Moisture (0-1cm)
                   </div>
                   <div
                     className={`text-lg font-bold mt-0.5 ${
                       currentTelemetry.soilMoisture > 0.35
-                        ? "text-amber-600"
+                        ? "text-amber-400"
                         : currentTelemetry.soilMoisture < 0.18
-                        ? "text-rose-600"
-                        : "text-emerald-700"
+                        ? "text-rose-400"
+                        : "text-emerald-400"
                     }`}
                   >
                     {currentTelemetry.soilMoisture.toFixed(2)} m³/m³
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200 transform hover:scale-[1.02] transition-transform duration-300 hover:shadow-xs hover:border-slate-300 cursor-default">
-                  <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-                    <CloudRain className="h-3 w-3 text-slate-400" /> Rain Probability
+                <div className="bg-[#052116]/90 p-2.5 rounded-xl border border-emerald-800/60 transform hover:scale-[1.02] transition-transform duration-300 hover:shadow-xs hover:border-emerald-600/60 cursor-default">
+                  <div className="text-[11px] text-emerald-300/70 font-medium flex items-center gap-1">
+                    <CloudRain className="h-3 w-3 text-blue-400" /> Rain Probability
                   </div>
                   <div
                     className={`text-lg font-bold mt-0.5 ${
-                      currentTelemetry.precipitationProbability > 30 ? "text-rose-600" : "text-slate-900"
+                      currentTelemetry.precipitationProbability > 30 ? "text-rose-400" : "text-white"
                     }`}
                   >
                     {currentTelemetry.precipitationProbability}%
@@ -1130,7 +1130,7 @@ export default function AgRiskDashboard() {
               </div>
             </div>
 
-            <div className="mt-3 text-[11px] text-slate-400 font-medium text-right">
+            <div className="mt-3 text-[11px] text-emerald-400/60 font-medium text-right">
               Lat: {selectedCity.latitude.toFixed(2)}° N &bull; Lon: {selectedCity.longitude.toFixed(2)}° E
             </div>
           </div>
@@ -1139,22 +1139,22 @@ export default function AgRiskDashboard() {
         {/* 3. 24-Hour Risk Timeline Strip */}
         <motion.section
           variants={itemVariants}
-          className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm"
+          className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-5 shadow-sm backdrop-blur-xs"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-emerald-700" />
-              <h3 className="text-sm font-bold text-slate-900">
+              <Clock className="h-4 w-4 text-emerald-400" />
+              <h3 className="text-sm font-bold text-white">
                 24-Hour Operational Risk Timeline &bull; {selectedCity.name} ({activityConfigs.find((a) => a.id === selectedActivity)?.hindiTitle})
               </h3>
             </div>
             
             <div className="flex items-center flex-wrap gap-2 text-xs">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 font-bold border border-emerald-300 text-xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-950/80 text-emerald-300 font-bold border border-emerald-600/40 text-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                 Safest Window: {activeEval.safestRange}
               </span>
-              <div className="flex items-center gap-3 text-slate-500 text-[11px] font-medium ml-1">
+              <div className="flex items-center gap-3 text-emerald-300/80 text-[11px] font-medium ml-1">
                 <span className="flex items-center gap-1">
                   <span className="w-2.5 h-2.5 rounded bg-emerald-500"></span> Favorable
                 </span>
@@ -1168,7 +1168,7 @@ export default function AgRiskDashboard() {
             </div>
           </div>
 
-          <div className="overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-200">
+          <div className="overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-emerald-800/60">
             <div className="flex gap-2 min-w-[850px]">
               {hourlyRiskTimeline.map((item, idx) => {
                 const isSafestPill =
@@ -1180,25 +1180,25 @@ export default function AgRiskDashboard() {
                     key={`${item.hour}-${idx}`}
                     className={`flex-1 min-w-[70px] p-2.5 rounded-xl border text-center transition flex flex-col justify-between relative ${
                       isSafestPill
-                        ? "bg-emerald-50 border-emerald-500 ring-2 ring-emerald-500/20 shadow-xs"
+                        ? "bg-emerald-900/60 border-emerald-400 ring-2 ring-emerald-400/30 shadow-xs"
                         : item.risk === "safe"
-                        ? "bg-emerald-50/50 border-emerald-200"
+                        ? "bg-[#052116] border-emerald-800/60"
                         : item.risk === "moderate"
-                        ? "bg-amber-50/50 border-amber-200"
-                        : "bg-rose-50/50 border-rose-200"
+                        ? "bg-[#231a0e]/90 border-amber-800/60"
+                        : "bg-[#291118]/90 border-rose-800/60"
                     }`}
                   >
                     {isSafestPill && item.hour === "06:00" && (
-                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-emerald-700 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full whitespace-nowrap shadow-xs">
+                      <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-full whitespace-nowrap shadow-xs">
                         Safest
                       </span>
                     )}
 
                     <div>
-                      <div className="text-xs font-bold text-slate-900">
+                      <div className="text-xs font-bold text-white">
                         {item.hour}
                       </div>
-                      <div className="text-[10px] text-slate-500 mt-0.5 font-medium">
+                      <div className="text-[10px] text-emerald-200/70 mt-0.5 font-medium">
                         {item.temp}
                       </div>
                     </div>
@@ -1207,19 +1207,19 @@ export default function AgRiskDashboard() {
                       <span
                         className={`inline-block w-full py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                           item.risk === "safe"
-                            ? "bg-emerald-100 text-emerald-800"
+                            ? "bg-emerald-950/80 text-emerald-300 border border-emerald-800/60"
                             : item.risk === "moderate"
-                            ? "bg-amber-100 text-amber-900"
-                            : "bg-rose-100 text-rose-800"
+                            ? "bg-amber-950/80 text-amber-300 border border-amber-800/60"
+                            : "bg-rose-950/80 text-rose-300 border border-rose-800/60"
                         }`}
                       >
                         {item.risk}
                       </span>
                     </div>
 
-                    <div className="text-[10px] text-slate-500 font-medium">
+                    <div className="text-[10px] text-emerald-300/70 font-medium">
                       <div>{item.wind}</div>
-                      <div className="text-[9px] text-slate-400">Rain: {item.rain}</div>
+                      <div className="text-[9px] text-emerald-400/60">Rain: {item.rain}</div>
                     </div>
                   </div>
                 );
@@ -1231,34 +1231,34 @@ export default function AgRiskDashboard() {
         {/* 4. Chat Section */}
         <motion.section
           variants={itemVariants}
-          className="bg-white border border-slate-200 rounded-2xl shadow-sm flex-1 flex flex-col overflow-hidden min-h-[500px]"
+          className="bg-[#082f20]/90 border border-emerald-800/60 rounded-2xl shadow-sm flex-1 flex flex-col overflow-hidden min-h-[500px] backdrop-blur-xs"
         >
           {/* Distinct Profile Header featuring Kisan Sahayak Avatar */}
-          <div className="px-5 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 via-emerald-50/20 to-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5">
+          <div className="px-5 py-4 border-b border-emerald-800/40 bg-gradient-to-r from-[#062418] via-[#093524] to-[#062418] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5">
             <div className="flex items-center gap-3.5">
               <div className="relative">
                 <KisanSahayakAvatar size="lg" glowing={true} />
                 <span className="absolute -top-1 -right-1 flex h-3 w-3">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-[#062418]"></span>
                 </span>
               </div>
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                  <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
                     Kisan Sahayak: Your AI Agronomist
                   </h2>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-900/80 text-emerald-300 border border-emerald-600/40 shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                     Online &bull; {selectedCity.name}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-1.5 flex-wrap">
+                <p className="text-xs text-emerald-200/70 font-medium mt-0.5 flex items-center gap-1.5 flex-wrap">
                   <span>Precision Agronomy Advisory</span>
                   <span>&bull;</span>
-                  <span className="text-emerald-700 font-semibold">Open-Meteo Ground Telemetry</span>
+                  <span className="text-emerald-400 font-semibold">Open-Meteo Ground Telemetry</span>
                   <span>&bull;</span>
-                  <span className="text-slate-600">Hinglish &amp; English</span>
+                  <span className="text-emerald-300/80">Hinglish &amp; English</span>
                 </p>
               </div>
             </div>
@@ -1268,17 +1268,17 @@ export default function AgRiskDashboard() {
                 type="button"
                 onClick={() => regenerate()}
                 disabled={isLoading}
-                className="text-xs px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition font-medium disabled:opacity-50 shadow-xs cursor-pointer self-start sm:self-auto"
+                className="text-xs px-3.5 py-1.5 rounded-xl bg-[#052116] hover:bg-[#0c402b] text-emerald-200 border border-emerald-700/60 flex items-center gap-1.5 transition font-medium disabled:opacity-50 shadow-xs cursor-pointer self-start sm:self-auto"
               >
-                <RefreshCw className="h-3.5 w-3.5 text-emerald-700" />
+                <RefreshCw className="h-3.5 w-3.5 text-emerald-400" />
                 <span>Regenerate</span>
               </button>
             )}
           </div>
 
-          <div className="px-5 py-2.5 bg-slate-50/50 border-b border-slate-100 flex items-center gap-2 overflow-x-auto text-xs scrollbar-none">
-            <span className="text-slate-500 font-bold shrink-0 flex items-center gap-1 text-[11px] uppercase tracking-wider">
-              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
+          <div className="px-5 py-2.5 bg-[#052116]/80 border-b border-emerald-800/40 flex items-center gap-2 overflow-x-auto text-xs scrollbar-none">
+            <span className="text-emerald-300/80 font-bold shrink-0 flex items-center gap-1 text-[11px] uppercase tracking-wider">
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
               Quick Questions:
             </span>
             <button
@@ -1288,7 +1288,7 @@ export default function AgRiskDashboard() {
                   `Kya kal subah ${selectedCity.name} me gehu/sarson par dawai spray karna surakshit hai? Lat: ${selectedCity.latitude}, Lon: ${selectedCity.longitude} ka risk check karo.`
                 )
               }
-              className="px-3 py-1 rounded-full bg-white hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 border border-slate-200 shrink-0 transition text-xs shadow-xs cursor-pointer"
+              className="px-3 py-1 rounded-full bg-[#082f20] hover:bg-emerald-800/60 hover:border-emerald-500 text-emerald-100 border border-emerald-800/60 shrink-0 transition text-xs shadow-xs cursor-pointer"
             >
               🌿 {selectedCity.name} me Spraying safe hai kal?
             </button>
@@ -1299,7 +1299,7 @@ export default function AgRiskDashboard() {
                   `${selectedCity.name} (Lat: ${selectedCity.latitude}, Lon: ${selectedCity.longitude}) me mitti ki nami aur tapman check karke beej bonai ka risk batao.`
                 )
               }
-              className="px-3 py-1 rounded-full bg-white hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 border border-slate-200 shrink-0 transition text-xs shadow-xs cursor-pointer"
+              className="px-3 py-1 rounded-full bg-[#082f20] hover:bg-emerald-800/60 hover:border-emerald-500 text-emerald-100 border border-emerald-800/60 shrink-0 transition text-xs shadow-xs cursor-pointer"
             >
               🌾 {selectedCity.name} Sowing risk &amp; Soil Moisture
             </button>
@@ -1310,46 +1310,46 @@ export default function AgRiskDashboard() {
                   `Aane wale 48 ghante me ${selectedCity.name} me khet sinchai karni chahiye ya barish ka intezar karein?`
                 )
               }
-              className="px-3 py-1 rounded-full bg-white hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 border border-slate-200 shrink-0 transition text-xs shadow-xs cursor-pointer"
+              className="px-3 py-1 rounded-full bg-[#082f20] hover:bg-emerald-800/60 hover:border-emerald-500 text-emerald-100 border border-emerald-800/60 shrink-0 transition text-xs shadow-xs cursor-pointer"
             >
               💧 Khet Sinchai Decision
             </button>
           </div>
 
-          <div className="flex-1 p-5 overflow-y-auto space-y-4 max-h-[480px] bg-slate-50/30">
+          <div className="flex-1 p-5 overflow-y-auto space-y-4 max-h-[480px] bg-[#041910]/60">
             {messages.length === 0 ? (
-              <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-8 sm:p-10 border border-dashed border-slate-200 rounded-2xl bg-white/95 shadow-2xs my-auto">
+              <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-8 sm:p-10 border border-dashed border-emerald-700/50 rounded-2xl bg-[#052116]/90 shadow-2xs my-auto backdrop-blur-xs">
                 {/* Large friendly illustration using Lucide icons */}
                 <div className="relative mb-5 flex items-center justify-center">
                   {/* Soft emerald glowing backdrop */}
-                  <div className="absolute w-28 h-28 rounded-full bg-emerald-100/70 blur-xl animate-pulse pointer-events-none"></div>
+                  <div className="absolute w-28 h-28 rounded-full bg-emerald-500/20 blur-xl animate-pulse pointer-events-none"></div>
 
                   {/* Main icon container */}
-                  <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100/60 border-2 border-emerald-200/90 flex items-center justify-center shadow-lg shadow-emerald-500/10">
-                    <CloudSun className="h-12 w-12 text-emerald-600 drop-shadow-md" />
+                  <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-900/60 via-[#072f1f] to-emerald-950 border-2 border-emerald-600/40 flex items-center justify-center shadow-lg shadow-emerald-950/40">
+                    <CloudSun className="h-12 w-12 text-emerald-400 drop-shadow-md" />
 
                     {/* Layered Tractor badge overlapping with drop-shadow */}
-                    <div className="absolute -bottom-2.5 -right-2.5 p-2 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 text-white border-2 border-white shadow-md shadow-emerald-700/25 transform hover:scale-110 transition-transform">
+                    <div className="absolute -bottom-2.5 -right-2.5 p-2 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 text-white border-2 border-[#052116] shadow-md shadow-emerald-950/40 transform hover:scale-110 transition-transform">
                       <Tractor className="h-5 w-5 drop-shadow-xs" />
                     </div>
 
                     {/* Small Sprout accent badge on top left */}
-                    <div className="absolute -top-1.5 -left-1.5 p-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 shadow-xs">
+                    <div className="absolute -top-1.5 -left-1.5 p-1 rounded-full bg-amber-950/80 text-amber-300 border border-amber-700/60 shadow-xs">
                       <Sprout className="h-3 w-3" />
                     </div>
                   </div>
                 </div>
 
-                <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                <h3 className="text-lg sm:text-xl font-black text-white tracking-tight">
                   Namaste! I am your Kisan Sahayak.
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-600 max-w-md mt-2 leading-relaxed font-medium">
+                <p className="text-xs sm:text-sm text-emerald-200/80 max-w-md mt-2 leading-relaxed font-medium">
                   Tap the microphone below to ask me about today&apos;s spraying or sowing conditions.
                 </p>
 
                 {/* Location context badge */}
-                <div className="mt-3.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700">
-                  <MapPin className="h-3.5 w-3.5 text-emerald-700" />
+                <div className="mt-3.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-700/60 text-xs font-semibold text-emerald-200">
+                  <MapPin className="h-3.5 w-3.5 text-emerald-400" />
                   <span>Kisan Hub: {selectedCity.name} ({selectedCity.state})</span>
                 </div>
 
@@ -1362,14 +1362,14 @@ export default function AgRiskDashboard() {
                         `Kya kal subah ${selectedCity.name} me gehu/sarson par dawai spray karna surakshit hai? Lat: ${selectedCity.latitude}, Lon: ${selectedCity.longitude} ka risk check karo.`
                       )
                     }
-                    className="p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-700 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
+                    className="p-3 rounded-xl bg-[#082f20] hover:bg-[#0e4730] border border-emerald-800/60 hover:border-emerald-500 text-emerald-100 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
                   >
-                    <div className="h-7 w-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <div className="h-7 w-7 rounded-lg bg-emerald-900/80 text-emerald-300 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                       <Sprout className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold text-slate-900 group-hover:text-emerald-950">Dawai Chidkaav Risk</div>
-                      <div className="text-[11px] text-slate-500 truncate">Kal subah spray safe hai?</div>
+                      <div className="font-bold text-white group-hover:text-emerald-300">Dawai Chidkaav Risk</div>
+                      <div className="text-[11px] text-emerald-200/70 truncate">Kal subah spray safe hai?</div>
                     </div>
                   </button>
 
@@ -1380,14 +1380,14 @@ export default function AgRiskDashboard() {
                         `${selectedCity.name} (Lat: ${selectedCity.latitude}, Lon: ${selectedCity.longitude}) me mitti ki nami aur tapman check karke beej bonai ka risk batao.`
                       )
                     }
-                    className="p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-700 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
+                    className="p-3 rounded-xl bg-[#082f20] hover:bg-[#0e4730] border border-emerald-800/60 hover:border-emerald-500 text-emerald-100 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
                   >
-                    <div className="h-7 w-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                    <div className="h-7 w-7 rounded-lg bg-amber-900/80 text-amber-300 flex items-center justify-center shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-colors">
                       <Wheat className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold text-slate-900 group-hover:text-amber-950">Beej Bonai &amp; Mitti</div>
-                      <div className="text-[11px] text-slate-500 truncate">Soil moisture germination check</div>
+                      <div className="font-bold text-white group-hover:text-amber-300">Beej Bonai &amp; Mitti</div>
+                      <div className="text-[11px] text-emerald-200/70 truncate">Soil moisture germination check</div>
                     </div>
                   </button>
 
@@ -1398,14 +1398,14 @@ export default function AgRiskDashboard() {
                         `Aane wale 48 ghante me ${selectedCity.name} me khet sinchai karni chahiye ya barish ka intezar karein?`
                       )
                     }
-                    className="p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-700 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
+                    className="p-3 rounded-xl bg-[#082f20] hover:bg-[#0e4730] border border-emerald-800/60 hover:border-emerald-500 text-emerald-100 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
                   >
-                    <div className="h-7 w-7 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <div className="h-7 w-7 rounded-lg bg-blue-900/80 text-blue-300 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                       <Droplets className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold text-slate-900 group-hover:text-blue-950">Khet Sinchai Decision</div>
-                      <div className="text-[11px] text-slate-500 truncate">Tube-well paani kab lagayein?</div>
+                      <div className="font-bold text-white group-hover:text-blue-300">Khet Sinchai Decision</div>
+                      <div className="text-[11px] text-emerald-200/70 truncate">Tube-well paani kab lagayein?</div>
                     </div>
                   </button>
 
@@ -1416,14 +1416,14 @@ export default function AgRiskDashboard() {
                         `Kya ${selectedCity.name} me fasal kataai (harvesting) ke liye aane wale 2 din mausam saaf rahega?`
                       )
                     }
-                    className="p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-700 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
+                    className="p-3 rounded-xl bg-[#082f20] hover:bg-[#0e4730] border border-emerald-800/60 hover:border-emerald-500 text-emerald-100 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
                   >
-                    <div className="h-7 w-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <div className="h-7 w-7 rounded-lg bg-emerald-900/80 text-emerald-300 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                       <Tractor className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold text-slate-900 group-hover:text-emerald-950">Fasal Kataai Window</div>
-                      <div className="text-[11px] text-slate-500 truncate">Dry harvesting window check</div>
+                      <div className="font-bold text-white group-hover:text-emerald-300">Fasal Kataai Window</div>
+                      <div className="text-[11px] text-emerald-200/70 truncate">Dry harvesting window check</div>
                     </div>
                   </button>
                 </div>
@@ -1450,14 +1450,14 @@ export default function AgRiskDashboard() {
                     <div
                       className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                         isUser
-                          ? "bg-emerald-700 text-white shadow-sm rounded-tr-none"
-                          : "bg-white text-slate-800 border border-slate-200 shadow-sm rounded-tl-none whitespace-pre-wrap"
+                          ? "bg-emerald-600 text-white shadow-sm rounded-tr-none"
+                          : "bg-[#072d1f] text-emerald-50 border border-emerald-700/60 shadow-sm rounded-tl-none whitespace-pre-wrap"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2 mb-1.5">
                         <div
                           className={`text-[11px] font-bold uppercase tracking-wider ${
-                            isUser ? "text-emerald-100" : "text-emerald-800"
+                            isUser ? "text-emerald-100" : "text-emerald-400"
                           }`}
                         >
                           {isUser ? "Aap (Farmer)" : "Kisan Sahayak (AI Agronomist)"}
@@ -1470,8 +1470,8 @@ export default function AgRiskDashboard() {
                             title={isCurrentlySpeaking ? "Stop Voice" : "Audio Suniye (Listen in Hinglish)"}
                             className={`flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium border transition cursor-pointer ${
                               isCurrentlySpeaking
-                                ? "bg-rose-50 text-rose-700 border-rose-200 animate-pulse"
-                                : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
+                                ? "bg-rose-950/80 text-rose-300 border-rose-800/60 animate-pulse"
+                                : "bg-[#052116] hover:bg-[#0c402b] text-emerald-200 border-emerald-700/60"
                             }`}
                           >
                             {isCurrentlySpeaking ? (
@@ -1481,7 +1481,7 @@ export default function AgRiskDashboard() {
                               </>
                             ) : (
                               <>
-                                <Volume2 className="h-3 w-3 text-emerald-700" />
+                                <Volume2 className="h-3 w-3 text-emerald-400" />
                                 <span>Suniye</span>
                               </>
                             )}
@@ -1492,8 +1492,8 @@ export default function AgRiskDashboard() {
                       {!isUser &&
                         Array.isArray(message.parts) &&
                         message.parts.some((p: MessagePart) => p.type?.startsWith("tool")) && (
-                          <div className="mb-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-[11px] font-semibold text-emerald-800">
-                            <Sprout className="h-3.5 w-3.5 text-emerald-700" />
+                          <div className="mb-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-950/80 border border-emerald-700/60 text-[11px] font-semibold text-emerald-300">
+                            <Sprout className="h-3.5 w-3.5 text-emerald-400" />
                             <span>Open-Meteo telemetry analyzed for {selectedCity.name}</span>
                           </div>
                         )}
@@ -1504,7 +1504,7 @@ export default function AgRiskDashboard() {
                     </div>
 
                     {isUser && (
-                      <div className="h-8 w-8 rounded-lg bg-emerald-800 flex items-center justify-center text-white shrink-0 mt-0.5 shadow-xs">
+                      <div className="h-8 w-8 rounded-lg bg-emerald-700 flex items-center justify-center text-white shrink-0 mt-0.5 shadow-xs">
                         <User className="h-4 w-4" />
                       </div>
                     )}
@@ -1515,19 +1515,19 @@ export default function AgRiskDashboard() {
 
             {isLoading && (
               <div className="flex items-start gap-3 justify-start">
-                <div className="h-8 w-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0 mt-0.5 shadow-xs">
+                <div className="h-8 w-8 rounded-lg bg-emerald-900/60 border border-emerald-700/60 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5 shadow-xs">
                   <Loader2 className="h-4 w-4 animate-spin" />
                 </div>
-                <div className="bg-white text-slate-600 border border-slate-200 rounded-2xl rounded-tl-none px-4 py-2.5 text-xs flex items-center gap-2 shadow-sm">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-600" />
+                <div className="bg-[#072d1f] text-emerald-200 border border-emerald-700/60 rounded-2xl rounded-tl-none px-4 py-2.5 text-xs flex items-center gap-2 shadow-sm">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-400" />
                   <span>Open-Meteo se {selectedCity.name} ka mausam aur mitti data fetch kiya jaa raha hai...</span>
                 </div>
               </div>
             )}
 
             {error && (
-              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2.5 shadow-xs">
-                <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600" />
+              <div className="p-3.5 rounded-xl bg-rose-950/80 border border-rose-800/60 text-rose-300 text-xs flex items-center gap-2.5 shadow-xs">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
                 <div>
                   <span className="font-bold">Error:</span> {error.message || "Failed to communicate with AI route."}
                 </div>
@@ -1539,7 +1539,7 @@ export default function AgRiskDashboard() {
 
           <form
             onSubmit={handleSubmit}
-            className="p-4 border-t border-slate-200 bg-white flex items-center gap-2.5 shadow-xs"
+            className="p-4 border-t border-emerald-800/60 bg-[#062418] flex items-center gap-2.5 shadow-xs"
           >
             <button
               type="button"
@@ -1549,7 +1549,7 @@ export default function AgRiskDashboard() {
               className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 border transition-all cursor-pointer ${
                 isRecording
                   ? "bg-rose-500 text-white border-rose-600 animate-pulse shadow-md ring-4 ring-rose-200"
-                  : "bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border-slate-200 hover:border-emerald-300 shadow-xs"
+                  : "bg-[#052116] hover:bg-emerald-900/80 text-emerald-200 hover:text-emerald-300 border-emerald-700/60 hover:border-emerald-500 shadow-xs"
               }`}
             >
               {isRecording ? (
@@ -1570,11 +1570,11 @@ export default function AgRiskDashboard() {
                     : `Sawal poochein jaise: Kya kal ${selectedCity.name} me dawai spray karna safe hai?...`
                 }
                 disabled={isLoading}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-600 focus:bg-white transition disabled:opacity-50"
+                className="w-full bg-[#052116] border border-emerald-700/60 rounded-xl px-4 py-2.5 text-sm text-white placeholder-emerald-400/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 focus:bg-[#07281b] transition disabled:opacity-50"
               />
               {isRecording && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[11px] font-bold text-rose-600 animate-pulse">
-                  <span className="w-2 h-2 rounded-full bg-rose-600"></span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[11px] font-bold text-rose-400 animate-pulse">
+                  <span className="w-2 h-2 rounded-full bg-rose-500"></span>
                   Recording...
                 </span>
               )}
@@ -1583,7 +1583,7 @@ export default function AgRiskDashboard() {
             <button
               type="submit"
               disabled={isLoading || !input.trim()}
-              className="h-11 px-5 bg-emerald-700 hover:bg-emerald-800 active:scale-95 text-white font-bold text-sm rounded-xl shadow-sm flex items-center gap-2 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer"
+              className="h-11 px-5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-sm rounded-xl shadow-sm flex items-center gap-2 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer"
             >
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1596,7 +1596,7 @@ export default function AgRiskDashboard() {
         </motion.section>
       </motion.main>
 
-      <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
+      <footer className="border-t border-emerald-800/50 bg-[#052116] py-4 text-center text-xs text-emerald-300/80">
         <p className="font-medium">
           WeatherGPT Agricultural Decision Engine &bull; Open-Meteo Weather &amp; Soil Telemetry &bull; Powered by Google Gemini AI
         </p>
