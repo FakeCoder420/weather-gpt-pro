@@ -29,6 +29,14 @@ import {
   CloudSun,
   Activity,
   MapPin,
+  Search,
+  X,
+  Sun,
+  Thermometer,
+  Zap,
+  AlarmCheck,
+  LocateFixed,
+  Languages,
   type LucideIcon,
 } from "lucide-react";
 
@@ -142,6 +150,28 @@ interface RawHourlyData {
   precipitation_probability: number[];
   soil_moisture_0_to_1cm: number[];
 }
+
+interface RawDailyData {
+  time: string[];
+  temperature_2m_max: number[];
+  temperature_2m_min: number[];
+  precipitation_sum: number[];
+  precipitation_probability_max: number[];
+  wind_speed_10m_max: number[];
+  weathercode: number[];
+}
+
+interface GeoSearchResult {
+  id: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  admin1?: string;
+  admin2?: string;
+}
+
+type LanguageMode = "hinglish" | "hindi" | "english";
 
 interface MessagePart {
   type: string;
