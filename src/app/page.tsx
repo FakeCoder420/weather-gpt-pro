@@ -246,22 +246,38 @@ export default function AgRiskDashboard() {
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const [isFetchingWeather, setIsFetchingWeather] = useState(false);
   const [rawWeather, setRawWeather] = useState<RawHourlyData | null>(null);
+  const [rawDaily, setRawDaily] = useState<RawDailyData | null>(null);
+
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<GeoSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Language mode
+  const [langMode, setLangMode] = useState<LanguageMode>("hinglish");
 
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const isLoading = status === "submitted" || status === "streaming";
 
-  // Fetch Open-Meteo telemetry for location
+  // Fetch Open-Meteo telemetry + 7-day daily for location
   const fetchOpenMeteo = useCallback(async (lat: number, lon: number) => {
     setIsFetchingWeather(true);
     try {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,precipitation_probability,soil_moisture_0_to_1cm&forecast_days=2`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Failed to fetch weather data");
-      const data = (await res.json()) as { hourly?: RawHourlyData };
-      if (data?.hourly) {
-        setRawWeather(data.hourly);
+      const [hourlyRes, dailyRes] = await Promise.all([
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,precipitation_probability,soil_moisture_0_to_1cm&forecast_days=2`),
+        fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,weathercode&timezone=auto&forecast_days=7`),
+      ]);
+      if (hourlyRes.ok) {
+        const data = (await hourlyRes.json()) as { hourly?: RawHourlyData };
+        if (data?.hourly) setRawWeather(data.hourly);
+      }
+      if (dailyRes.ok) {
+        const data = (await dailyRes.json()) as { daily?: RawDailyData };
+        if (data?.daily) setRawDaily(data.daily);
       }
     } catch (err) {
       console.warn("Open-Meteo fetch warning:", err);
@@ -269,6 +285,48 @@ export default function AgRiskDashboard() {
       setIsFetchingWeather(false);
     }
   }, []);
+
+  // Geocoding search via Open-Meteo Geocoding API
+  const searchCities = useCallback(async (query: string) => {
+    if (query.trim().length < 2) { setSearchResults([]); return; }
+    setIsSearching(true);
+    try {
+      const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=6&language=en&format=json`);
+      if (!res.ok) return;
+      const data = (await res.json()) as { results?: GeoSearchResult[] };
+      setSearchResults(data?.results ?? []);
+    } catch (err) {
+      console.warn("Geocoding search error:", err);
+    } finally {
+      setIsSearching(false);
+    }
+  }, []);
+
+  // GPS geolocation
+  const handleGPS = useCallback(() => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      alert("GPS not available in your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const customCity: CityLocation = {
+          name: "My Farm Location",
+          hindiName: "मेरा खेत",
+          state: "GPS Location",
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          zone: "Live GPS",
+        };
+        setSelectedCity(customCity);
+        void fetchOpenMeteo(customCity.latitude, customCity.longitude);
+        setShowSearch(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      },
+      () => { alert("Could not get GPS location. Please allow location access."); }
+    );
+  }, [fetchOpenMeteo]);
 
   useEffect(() => {
     let active = true;
