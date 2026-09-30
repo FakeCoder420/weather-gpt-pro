@@ -26,10 +26,67 @@ import {
   Tractor,
   Wheat,
   CloudRain,
+  CloudSun,
   Activity,
   MapPin,
   type LucideIcon,
 } from "lucide-react";
+
+// Kisan Sahayak AI Avatar Component
+interface KisanSahayakAvatarProps {
+  size?: "sm" | "md" | "lg";
+  glowing?: boolean;
+  className?: string;
+}
+
+function KisanSahayakAvatar({
+  size = "md",
+  glowing = false,
+  className = "",
+}: KisanSahayakAvatarProps) {
+  const sizeClasses = {
+    sm: "h-8 w-8 text-white",
+    md: "h-10 w-10 text-white",
+    lg: "h-12 w-12 text-white",
+  };
+
+  const iconSizes = {
+    sm: "h-4 w-4",
+    md: "h-5 w-5",
+    lg: "h-6 w-6",
+  };
+
+  const badgeSizes = {
+    sm: "h-3 w-3 -bottom-0.5 -right-0.5",
+    md: "h-3.5 w-3.5 -bottom-0.5 -right-0.5",
+    lg: "h-4.5 w-4.5 -bottom-0.5 -right-0.5",
+  };
+
+  const sproutSizes = {
+    sm: "h-2 w-2",
+    md: "h-2.5 w-2.5",
+    lg: "h-3 w-3",
+  };
+
+  return (
+    <div
+      className={`relative inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-700 shadow-md ${
+        sizeClasses[size]
+      } ${
+        glowing
+          ? "ring-4 ring-emerald-500/20 shadow-lg shadow-emerald-500/25"
+          : "ring-1 ring-white/30"
+      } ${className}`}
+    >
+      <Bot className={`${iconSizes[size]} drop-shadow-xs`} />
+      <span
+        className={`absolute rounded-full bg-emerald-400 border-2 border-white flex items-center justify-center text-emerald-950 font-bold ${badgeSizes[size]}`}
+      >
+        <Sprout className={sproutSizes[size]} />
+      </span>
+    </div>
+  );
+}
 
 // Activity Modes
 type ActivityMode = "spraying" | "sowing" | "harvesting" | "irrigation";
@@ -680,6 +737,61 @@ export default function AgRiskDashboard() {
         animate="visible"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 flex flex-col gap-6"
       >
+        {/* 0. Dynamic Agricultural Hero Banner */}
+        <motion.section
+          variants={itemVariants}
+          className="relative rounded-2xl overflow-hidden shadow-sm border border-slate-200/90 min-h-[220px] sm:min-h-[250px] md:min-h-[270px] flex flex-col justify-end p-6 sm:p-8"
+        >
+          {/* Wide high-quality agricultural farm background */}
+          <img
+            src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1600&q=80"
+            alt="Indian agricultural farm fields in golden morning light"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+
+          {/* Dark gradient overlay per specification: bg-gradient-to-r from-black/70 to-transparent */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
+
+          {/* Overlaid Title, Subtitle, and Badges in crisp white text */}
+          <div className="relative z-10 max-w-3xl flex flex-col gap-2.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/90 text-white border border-emerald-400/40 shadow-xs backdrop-blur-xs">
+                🌿 Precision Agronomy Intelligence
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white/90 bg-white/15 border border-white/20 backdrop-blur-xs flex items-center gap-1.5">
+                <MapPin className="h-3 w-3 text-emerald-400" />
+                {selectedCity.name}, {selectedCity.state} ({selectedCity.zone})
+              </span>
+            </div>
+
+            <div>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-md">
+                WeatherGPT: Ag-Risk Decision Engine
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-200 font-medium mt-1 max-w-2xl leading-relaxed drop-shadow-xs">
+                Real-time Open-Meteo microclimate telemetry &bull; Dynamic multi-factor agricultural risk modeling &bull; Conversational AI Kisan Sahayak in Hinglish
+              </p>
+            </div>
+
+            {/* Live Telemetry Chips on Banner */}
+            <div className="mt-1 flex items-center gap-2.5 flex-wrap pt-2.5 border-t border-white/15 text-xs text-white/90">
+              <div className="flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shadow-xs">
+                <Wind className="h-3.5 w-3.5 text-emerald-400" />
+                <span>Hawa (Wind): <strong className="text-white font-bold">{currentTelemetry.windSpeed.toFixed(1)} km/h</strong></span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shadow-xs">
+                <Droplets className="h-3.5 w-3.5 text-blue-400" />
+                <span>Barish Risk: <strong className="text-white font-bold">{currentTelemetry.precipitationProbability}%</strong></span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shadow-xs">
+                <Sprout className="h-3.5 w-3.5 text-emerald-300" />
+                <span>Mitti Nami: <strong className="text-white font-bold">{currentTelemetry.soilMoisture.toFixed(2)} m³/m³</strong></span>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
         {/* 1. Activity Mode Selector */}
         <motion.section
           variants={itemVariants}
@@ -1119,19 +1231,34 @@ export default function AgRiskDashboard() {
         {/* 4. Chat Section */}
         <motion.section
           variants={itemVariants}
-          className="bg-white border border-slate-200 rounded-2xl shadow-sm flex-1 flex flex-col overflow-hidden min-h-[480px]"
+          className="bg-white border border-slate-200 rounded-2xl shadow-sm flex-1 flex flex-col overflow-hidden min-h-[500px]"
         >
-          <div className="px-5 py-3.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-lg bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-xs">
-                <Bot className="h-5 w-5" />
+          {/* Distinct Profile Header featuring Kisan Sahayak Avatar */}
+          <div className="px-5 py-4 border-b border-slate-200 bg-gradient-to-r from-slate-50 via-emerald-50/20 to-white flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5">
+            <div className="flex items-center gap-3.5">
+              <div className="relative">
+                <KisanSahayakAvatar size="lg" glowing={true} />
+                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white"></span>
+                </span>
               </div>
               <div>
-                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                  Kisan Sahayak: WeatherGPT Hinglish Advisory &bull; {selectedCity.name}
-                </h2>
-                <p className="text-[11px] text-slate-500 font-medium">
-                  Direct agricultural risk consulting with voice input &amp; audio read-out
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                    Kisan Sahayak: Your AI Agronomist
+                  </h2>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                    Online &bull; {selectedCity.name}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-1.5 flex-wrap">
+                  <span>Precision Agronomy Advisory</span>
+                  <span>&bull;</span>
+                  <span className="text-emerald-700 font-semibold">Open-Meteo Ground Telemetry</span>
+                  <span>&bull;</span>
+                  <span className="text-slate-600">Hinglish &amp; English</span>
                 </p>
               </div>
             </div>
@@ -1141,10 +1268,10 @@ export default function AgRiskDashboard() {
                 type="button"
                 onClick={() => regenerate()}
                 disabled={isLoading}
-                className="text-xs px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition font-medium disabled:opacity-50 shadow-xs cursor-pointer"
+                className="text-xs px-3.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition font-medium disabled:opacity-50 shadow-xs cursor-pointer self-start sm:self-auto"
               >
-                <RefreshCw className="h-3 w-3" />
-                Regenerate
+                <RefreshCw className="h-3.5 w-3.5 text-emerald-700" />
+                <span>Regenerate</span>
               </button>
             )}
           </div>
@@ -1189,18 +1316,117 @@ export default function AgRiskDashboard() {
             </button>
           </div>
 
-          <div className="flex-1 p-5 overflow-y-auto space-y-4 max-h-[460px] bg-slate-50/30">
+          <div className="flex-1 p-5 overflow-y-auto space-y-4 max-h-[480px] bg-slate-50/30">
             {messages.length === 0 ? (
-              <div className="h-full min-h-[220px] flex flex-col items-center justify-center text-center p-6 border border-dashed border-slate-200 rounded-xl bg-white">
-                <div className="h-12 w-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 mb-3 shadow-xs">
-                  <Sprout className="h-6 w-6" />
+              <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-8 sm:p-10 border border-dashed border-slate-200 rounded-2xl bg-white/95 shadow-2xs my-auto">
+                {/* Large friendly illustration using Lucide icons */}
+                <div className="relative mb-5 flex items-center justify-center">
+                  {/* Soft emerald glowing backdrop */}
+                  <div className="absolute w-28 h-28 rounded-full bg-emerald-100/70 blur-xl animate-pulse pointer-events-none"></div>
+
+                  {/* Main icon container */}
+                  <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100/60 border-2 border-emerald-200/90 flex items-center justify-center shadow-lg shadow-emerald-500/10">
+                    <CloudSun className="h-12 w-12 text-emerald-600 drop-shadow-md" />
+
+                    {/* Layered Tractor badge overlapping with drop-shadow */}
+                    <div className="absolute -bottom-2.5 -right-2.5 p-2 rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-700 text-white border-2 border-white shadow-md shadow-emerald-700/25 transform hover:scale-110 transition-transform">
+                      <Tractor className="h-5 w-5 drop-shadow-xs" />
+                    </div>
+
+                    {/* Small Sprout accent badge on top left */}
+                    <div className="absolute -top-1.5 -left-1.5 p-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200 shadow-xs">
+                      <Sprout className="h-3 w-3" />
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-base font-bold text-slate-900">
-                  Namaste Kisan Bhai! WeatherGPT me aapka swagat hai.
+
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                  Namaste! I am your Kisan Sahayak.
                 </h3>
-                <p className="text-xs text-slate-500 max-w-md mt-1 leading-relaxed">
-                  Aapka chuna hua shahar <strong>{selectedCity.name}</strong> ({selectedCity.state}) hai. Apne khet ki fasal aur mausam ka sawal poochein ya voice input button dabakar bolen.
+                <p className="text-xs sm:text-sm text-slate-600 max-w-md mt-2 leading-relaxed font-medium">
+                  Tap the microphone below to ask me about today&apos;s spraying or sowing conditions.
                 </p>
+
+                {/* Location context badge */}
+                <div className="mt-3.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-700">
+                  <MapPin className="h-3.5 w-3.5 text-emerald-700" />
+                  <span>Kisan Hub: {selectedCity.name} ({selectedCity.state})</span>
+                </div>
+
+                {/* Quick starter chips */}
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-xl text-left">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleQuickPrompt(
+                        `Kya kal subah ${selectedCity.name} me gehu/sarson par dawai spray karna surakshit hai? Lat: ${selectedCity.latitude}, Lon: ${selectedCity.longitude} ka risk check karo.`
+                      )
+                    }
+                    className="p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-700 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
+                  >
+                    <div className="h-7 w-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                      <Sprout className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-slate-900 group-hover:text-emerald-950">Dawai Chidkaav Risk</div>
+                      <div className="text-[11px] text-slate-500 truncate">Kal subah spray safe hai?</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleQuickPrompt(
+                        `${selectedCity.name} (Lat: ${selectedCity.latitude}, Lon: ${selectedCity.longitude}) me mitti ki nami aur tapman check karke beej bonai ka risk batao.`
+                      )
+                    }
+                    className="p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-700 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
+                  >
+                    <div className="h-7 w-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                      <Wheat className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-slate-900 group-hover:text-amber-950">Beej Bonai &amp; Mitti</div>
+                      <div className="text-[11px] text-slate-500 truncate">Soil moisture germination check</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleQuickPrompt(
+                        `Aane wale 48 ghante me ${selectedCity.name} me khet sinchai karni chahiye ya barish ka intezar karein?`
+                      )
+                    }
+                    className="p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-700 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
+                  >
+                    <div className="h-7 w-7 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                      <Droplets className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-slate-900 group-hover:text-blue-950">Khet Sinchai Decision</div>
+                      <div className="text-[11px] text-slate-500 truncate">Tube-well paani kab lagayein?</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleQuickPrompt(
+                        `Kya ${selectedCity.name} me fasal kataai (harvesting) ke liye aane wale 2 din mausam saaf rahega?`
+                      )
+                    }
+                    className="p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-emerald-300 text-slate-700 transition flex items-center gap-2.5 text-xs shadow-2xs group cursor-pointer"
+                  >
+                    <div className="h-7 w-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                      <Tractor className="h-4 w-4" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold text-slate-900 group-hover:text-emerald-950">Fasal Kataai Window</div>
+                      <div className="text-[11px] text-slate-500 truncate">Dry harvesting window check</div>
+                    </div>
+                  </button>
+                </div>
               </div>
             ) : (
               messages.map((message) => {
@@ -1216,8 +1442,8 @@ export default function AgRiskDashboard() {
                     }`}
                   >
                     {!isUser && (
-                      <div className="h-8 w-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0 mt-0.5 shadow-xs">
-                        <Bot className="h-4 w-4" />
+                      <div className="shrink-0 mt-0.5">
+                        <KisanSahayakAvatar size="sm" glowing={false} />
                       </div>
                     )}
 
@@ -1231,10 +1457,10 @@ export default function AgRiskDashboard() {
                       <div className="flex items-center justify-between gap-2 mb-1.5">
                         <div
                           className={`text-[11px] font-bold uppercase tracking-wider ${
-                            isUser ? "text-emerald-100" : "text-slate-500"
+                            isUser ? "text-emerald-100" : "text-emerald-800"
                           }`}
                         >
-                          {isUser ? "Aap (Farmer)" : "WeatherGPT Agronomy Engine"}
+                          {isUser ? "Aap (Farmer)" : "Kisan Sahayak (AI Agronomist)"}
                         </div>
 
                         {!isUser && content && (
