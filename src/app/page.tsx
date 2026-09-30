@@ -37,6 +37,9 @@ import {
   AlarmCheck,
   LocateFixed,
   Languages,
+  LayoutDashboard,
+  Bell,
+  MessageSquare,
   type LucideIcon,
 } from "lucide-react";
 
@@ -172,6 +175,7 @@ interface GeoSearchResult {
 }
 
 type LanguageMode = "hinglish" | "hindi" | "english";
+type ActiveTab = "overview" | "forecast" | "alerts" | "chat";
 
 interface MessagePart {
   type: string;
@@ -257,6 +261,10 @@ export default function AgRiskDashboard() {
 
   // Language mode
   const [langMode, setLangMode] = useState<LanguageMode>("hinglish");
+
+  // Navigation tab view: defaults to "overview" so top dashboard opens first
+  const [activeTab, setActiveTab] = useState<ActiveTab>("overview");
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -371,8 +379,21 @@ export default function AgRiskDashboard() {
     };
   }, []);
 
+  // Ensure user always starts at the top of the dashboard on load
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
+  // Only scroll internally inside the chat box when messages exist (never scroll window)
+  useEffect(() => {
+    if (messages.length > 0 && chatScrollRef.current) {
+      chatScrollRef.current.scrollTo({
+        top: chatScrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [messages, isLoading]);
 
   // Current conditions
@@ -1003,6 +1024,76 @@ export default function AgRiskDashboard() {
         </div>
       </motion.header>
 
+      {/* Navigation View Tabs */}
+      <div className="bg-[#052116]/95 border-b border-emerald-800/50 sticky top-[61px] sm:top-[69px] z-20 backdrop-blur-md shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-2 overflow-x-auto scrollbar-none">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab("overview")}
+              className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shrink-0 cursor-pointer ${
+                activeTab === "overview"
+                  ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-400/40"
+                  : "bg-[#082f20] text-emerald-200 hover:bg-[#0c402b] border border-emerald-800/60"
+              }`}
+            >
+              <LayoutDashboard className="h-3.5 w-3.5" />
+              <span>🌾 Dashboard Overview</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("forecast")}
+              className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shrink-0 cursor-pointer ${
+                activeTab === "forecast"
+                  ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-400/40"
+                  : "bg-[#082f20] text-emerald-200 hover:bg-[#0c402b] border border-emerald-800/60"
+              }`}
+            >
+              <CalendarCheck className="h-3.5 w-3.5" />
+              <span>📅 7-Day Forecast</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("alerts")}
+              className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shrink-0 cursor-pointer ${
+                activeTab === "alerts"
+                  ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-400/40"
+                  : "bg-[#082f20] text-emerald-200 hover:bg-[#0c402b] border border-emerald-800/60"
+              }`}
+            >
+              <ShieldAlert className="h-3.5 w-3.5" />
+              <span>🚨 Khet Alerts</span>
+              {khetAlerts.length > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-black">
+                  {khetAlerts.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("chat")}
+              className={`px-3 sm:px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 shrink-0 cursor-pointer ${
+                activeTab === "chat"
+                  ? "bg-emerald-600 text-white shadow-xs ring-1 ring-emerald-400/40"
+                  : "bg-[#082f20] text-emerald-200 hover:bg-[#0c402b] border border-emerald-800/60"
+              }`}
+            >
+              <Bot className="h-3.5 w-3.5" />
+              <span>🤖 Kisan Sahayak Chat</span>
+            </button>
+          </div>
+
+          <div className="hidden md:flex items-center gap-2 text-[11px] text-emerald-300/70 font-medium">
+            <span>📍 {selectedCity.name}</span>
+            <span>&bull;</span>
+            <span>{currentTelemetry.temperature.toFixed(1)}°C</span>
+          </div>
+        </div>
+      </div>
+
       {/* Main Container */}
       <motion.main
         variants={containerVariants}
@@ -1011,95 +1102,108 @@ export default function AgRiskDashboard() {
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 flex flex-col gap-6"
       >
         {/* 0. Dynamic Agricultural Hero Banner */}
-        <motion.section
-          variants={itemVariants}
-          className="relative rounded-2xl overflow-hidden shadow-sm border border-slate-200/90 min-h-[220px] sm:min-h-[250px] md:min-h-[270px] flex flex-col justify-end p-6 sm:p-8"
-        >
-          {/* Wide high-quality agricultural farm background */}
-          <img
-            src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1600&q=80"
-            alt="Indian agricultural farm fields in golden morning light"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-          />
+        {(activeTab === "overview" || activeTab === "forecast") && (
+          <motion.section
+            variants={itemVariants}
+            className="relative rounded-2xl overflow-hidden shadow-sm border border-slate-200/90 min-h-[220px] sm:min-h-[250px] md:min-h-[270px] flex flex-col justify-end p-6 sm:p-8"
+          >
+            {/* Wide high-quality agricultural farm background */}
+            <img
+              src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=1600&q=80"
+              alt="Indian agricultural farm fields in golden morning light"
+              className="absolute inset-0 w-full h-full object-cover object-center"
+            />
 
-          {/* Dark gradient overlay per specification: bg-gradient-to-r from-black/70 to-transparent */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
+            {/* Dark gradient overlay per specification: bg-gradient-to-r from-black/70 to-transparent */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"></div>
 
-          {/* Overlaid Title, Subtitle, and Badges in crisp white text */}
-          <div className="relative z-10 max-w-3xl flex flex-col gap-2.5">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/90 text-white border border-emerald-400/40 shadow-xs backdrop-blur-xs">
-                🌿 Precision Agronomy Intelligence
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white/90 bg-white/15 border border-white/20 backdrop-blur-xs flex items-center gap-1.5">
-                <MapPin className="h-3 w-3 text-emerald-400" />
-                {selectedCity.name}, {selectedCity.state} ({selectedCity.zone})
-              </span>
-            </div>
-
-            <div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-md">
-                WeatherGPT: Ag-Risk Decision Engine
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-200 font-medium mt-1 max-w-2xl leading-relaxed drop-shadow-xs">
-                Real-time Open-Meteo microclimate telemetry &bull; Dynamic multi-factor agricultural risk modeling &bull; Conversational AI Kisan Sahayak in Hinglish
-              </p>
-            </div>
-
-            {/* Live Telemetry Chips on Banner */}
-            <div className="mt-1 flex items-center gap-2.5 flex-wrap pt-2.5 border-t border-white/15 text-xs text-white/90">
-              <div className="flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shadow-xs">
-                <Wind className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Hawa (Wind): <strong className="text-white font-bold">{currentTelemetry.windSpeed.toFixed(1)} km/h</strong></span>
+            {/* Overlaid Title, Subtitle, and Badges in crisp white text */}
+            <div className="relative z-10 max-w-3xl flex flex-col gap-2.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/90 text-white border border-emerald-400/40 shadow-xs backdrop-blur-xs">
+                  🌿 Precision Agronomy Intelligence
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white/90 bg-white/15 border border-white/20 backdrop-blur-xs flex items-center gap-1.5">
+                  <MapPin className="h-3 w-3 text-emerald-400" />
+                  {selectedCity.name}, {selectedCity.state} ({selectedCity.zone})
+                </span>
               </div>
-              <div className="flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shadow-xs">
-                <Droplets className="h-3.5 w-3.5 text-blue-400" />
-                <span>Barish Risk: <strong className="text-white font-bold">{currentTelemetry.precipitationProbability}%</strong></span>
+
+              <div>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-md">
+                  WeatherGPT: Ag-Risk Decision Engine
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-200 font-medium mt-1 max-w-2xl leading-relaxed drop-shadow-xs">
+                  Real-time Open-Meteo microclimate telemetry &bull; Dynamic multi-factor agricultural risk modeling &bull; Conversational AI Kisan Sahayak in Hinglish
+                </p>
               </div>
-              <div className="flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shadow-xs">
-                <Sprout className="h-3.5 w-3.5 text-emerald-300" />
-                <span>Mitti Nami: <strong className="text-white font-bold">{currentTelemetry.soilMoisture.toFixed(2)} m³/m³</strong></span>
+
+              {/* Live Telemetry Chips on Banner */}
+              <div className="mt-1 flex items-center gap-2.5 flex-wrap pt-2.5 border-t border-white/15 text-xs text-white/90">
+                <div className="flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shadow-xs">
+                  <Wind className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>Hawa (Wind): <strong className="text-white font-bold">{currentTelemetry.windSpeed.toFixed(1)} km/h</strong></span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shadow-xs">
+                  <Droplets className="h-3.5 w-3.5 text-blue-400" />
+                  <span>Barish Risk: <strong className="text-white font-bold">{currentTelemetry.precipitationProbability}%</strong></span>
+                </div>
+                <div className="flex items-center gap-1.5 bg-black/35 backdrop-blur-xs px-2.5 py-1 rounded-lg border border-white/10 shadow-xs">
+                  <Sprout className="h-3.5 w-3.5 text-emerald-300" />
+                  <span>Mitti Nami: <strong className="text-white font-bold">{currentTelemetry.soilMoisture.toFixed(2)} m³/m³</strong></span>
+                </div>
               </div>
             </div>
-          </div>
-        </motion.section>
+          </motion.section>
+        )}
 
         {/* 0.5 Khet Suraksha Alert Banners */}
-        {khetAlerts.length > 0 && (
-          <motion.div variants={itemVariants} className="flex flex-col gap-2.5">
-            {khetAlerts.map((alert) => {
-              const Icon = alert.icon;
-              const styles = alert.severity === "critical"
-                ? "bg-rose-950/90 border-rose-700/70 text-rose-100 shadow-rose-950/30"
-                : alert.severity === "warning"
-                ? "bg-amber-950/90 border-amber-700/70 text-amber-100 shadow-amber-950/30"
-                : "bg-[#1a2a10]/90 border-emerald-700/70 text-emerald-100 shadow-emerald-950/30";
-              const iconColor = alert.severity === "critical" ? "text-rose-400" : alert.severity === "warning" ? "text-amber-400" : "text-emerald-400";
-              const badge = alert.severity === "critical" ? "bg-rose-900/80 text-rose-300 border-rose-700/60" : alert.severity === "warning" ? "bg-amber-900/80 text-amber-300 border-amber-700/60" : "bg-emerald-900/80 text-emerald-300 border-emerald-700/60";
-              return (
-                <div key={alert.id} className={`flex items-start gap-3 px-4 py-3 rounded-xl border shadow-sm backdrop-blur-xs ${styles}`}>
-                  <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${iconColor}`} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-sm">{alert.title}</span>
-                      <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${badge}`}>
-                        {alert.severity === "critical" ? "⚡ Critical" : alert.severity === "warning" ? "⚠ Warning" : "📋 Watch"}
-                      </span>
+        {(activeTab === "overview" || activeTab === "alerts") && (
+          <>
+            {khetAlerts.length > 0 ? (
+              <motion.div variants={itemVariants} className="flex flex-col gap-2.5">
+                {khetAlerts.map((alert) => {
+                  const Icon = alert.icon;
+                  const styles = alert.severity === "critical"
+                    ? "bg-rose-950/90 border-rose-700/70 text-rose-100 shadow-rose-950/30"
+                    : alert.severity === "warning"
+                    ? "bg-amber-950/90 border-amber-700/70 text-amber-100 shadow-amber-950/30"
+                    : "bg-[#1a2a10]/90 border-emerald-700/70 text-emerald-100 shadow-emerald-950/30";
+                  const iconColor = alert.severity === "critical" ? "text-rose-400" : alert.severity === "warning" ? "text-amber-400" : "text-emerald-400";
+                  const badge = alert.severity === "critical" ? "bg-rose-900/80 text-rose-300 border-rose-700/60" : alert.severity === "warning" ? "bg-amber-900/80 text-amber-300 border-amber-700/60" : "bg-emerald-900/80 text-emerald-300 border-emerald-700/60";
+                  return (
+                    <div key={alert.id} className={`flex items-start gap-3 px-4 py-3 rounded-xl border shadow-sm backdrop-blur-xs ${styles}`}>
+                      <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${iconColor}`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-sm">{alert.title}</span>
+                          <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${badge}`}>
+                            {alert.severity === "critical" ? "⚡ Critical" : alert.severity === "warning" ? "⚠ Warning" : "📋 Watch"}
+                          </span>
+                        </div>
+                        <p className="text-xs mt-0.5 opacity-85 leading-relaxed">{alert.description}</p>
+                      </div>
                     </div>
-                    <p className="text-xs mt-0.5 opacity-85 leading-relaxed">{alert.description}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </motion.div>
+                  );
+                })}
+              </motion.div>
+            ) : activeTab === "alerts" ? (
+              <motion.div variants={itemVariants} className="p-8 rounded-2xl bg-emerald-950/60 border border-emerald-700/60 text-center">
+                <CheckCircle2 className="h-10 w-10 text-emerald-400 mx-auto mb-2" />
+                <h3 className="text-base font-bold text-white">Sab Surakshit Hai (No Severe Farm Hazard Alerts)</h3>
+                <p className="text-xs text-emerald-200/80 mt-1 max-w-md mx-auto">Open-Meteo telemetry shows wind, temperature, rain risk, and soil moisture are within stable agronomic thresholds for {selectedCity.name}.</p>
+              </motion.div>
+            ) : null}
+          </>
         )}
 
         {/* 1. Activity Mode Selector */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-4 shadow-sm backdrop-blur-xs"
-        >
+        {activeTab === "overview" && (
+          <motion.section
+            variants={itemVariants}
+            className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-4 shadow-sm backdrop-blur-xs"
+          >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-emerald-800/40">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-300">
               <Activity className="h-4 w-4 text-emerald-400" />
@@ -1171,12 +1275,14 @@ export default function AgRiskDashboard() {
             })}
           </div>
         </motion.section>
+        )}
 
         {/* 2. Top Metrics Grid */}
-        <motion.section
-          variants={itemVariants}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
-        >
+        {activeTab === "overview" && (
+          <motion.section
+            variants={itemVariants}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+          >
           {/* Card 1: Operational Risk Score */}
           <div
             className={`border border-emerald-800/60 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden transition-colors duration-500 ${
@@ -1477,12 +1583,14 @@ export default function AgRiskDashboard() {
             </div>
           </div>
         </motion.section>
+        )}
 
         {/* 3. 24-Hour Risk Timeline Strip */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-5 shadow-sm backdrop-blur-xs"
-        >
+        {(activeTab === "overview" || activeTab === "forecast") && (
+          <motion.section
+            variants={itemVariants}
+            className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-5 shadow-sm backdrop-blur-xs"
+          >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-emerald-400" />
@@ -1569,12 +1677,14 @@ export default function AgRiskDashboard() {
             </div>
           </div>
         </motion.section>
+        )}
 
         {/* 3.5 — 7-Day Agronomic Outlook */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-5 shadow-sm backdrop-blur-xs"
-        >
+        {(activeTab === "overview" || activeTab === "forecast") && (
+          <motion.section
+            variants={itemVariants}
+            className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-5 shadow-sm backdrop-blur-xs"
+          >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <div className="flex items-center gap-2">
               <CalendarCheck className="h-4 w-4 text-emerald-400" />
@@ -1644,12 +1754,14 @@ export default function AgRiskDashboard() {
             </div>
           )}
         </motion.section>
+        )}
 
         {/* 4. Chat Section */}
-        <motion.section
-          variants={itemVariants}
-          className="bg-[#082f20]/90 border border-emerald-800/60 rounded-2xl shadow-sm flex-1 flex flex-col overflow-hidden min-h-[500px] backdrop-blur-xs"
-        >
+        {(activeTab === "overview" || activeTab === "chat") && (
+          <motion.section
+            variants={itemVariants}
+            className="bg-[#082f20]/90 border border-emerald-800/60 rounded-2xl shadow-sm flex-1 flex flex-col overflow-hidden min-h-[500px] backdrop-blur-xs"
+          >
           {/* Distinct Profile Header featuring Kisan Sahayak Avatar */}
           <div className="px-5 py-4 border-b border-emerald-800/40 bg-gradient-to-r from-[#062418] via-[#093524] to-[#062418] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3.5">
             <div className="flex items-center gap-3.5">
@@ -1733,7 +1845,7 @@ export default function AgRiskDashboard() {
             </button>
           </div>
 
-          <div className="flex-1 p-5 overflow-y-auto space-y-4 max-h-[480px] bg-[#041910]/60">
+          <div ref={chatScrollRef} className="flex-1 p-5 overflow-y-auto space-y-4 max-h-[480px] bg-[#041910]/60">
             {messages.length === 0 ? (
               <div className="h-full min-h-[340px] flex flex-col items-center justify-center text-center p-8 sm:p-10 border border-dashed border-emerald-700/50 rounded-2xl bg-[#052116]/90 shadow-2xs my-auto backdrop-blur-xs">
                 {/* Large friendly illustration using Lucide icons */}
@@ -2011,6 +2123,7 @@ export default function AgRiskDashboard() {
             </button>
           </form>
         </motion.section>
+        )}
       </motion.main>
 
       <footer className="border-t border-emerald-800/50 bg-[#052116] py-4 text-center text-xs text-emerald-300/80">
