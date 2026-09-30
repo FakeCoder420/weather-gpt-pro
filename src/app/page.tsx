@@ -332,12 +332,17 @@ export default function AgRiskDashboard() {
     let active = true;
     const fetchAsync = async () => {
       try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${selectedCity.latitude}&longitude=${selectedCity.longitude}&hourly=temperature_2m,wind_speed_10m,precipitation_probability,soil_moisture_0_to_1cm&forecast_days=2`;
-        const res = await fetch(url);
-        if (!res.ok) return;
-        const data = (await res.json()) as { hourly?: RawHourlyData };
-        if (active && data?.hourly) {
-          setRawWeather(data.hourly);
+        const [hourlyRes, dailyRes] = await Promise.all([
+          fetch(`https://api.open-meteo.com/v1/forecast?latitude=${selectedCity.latitude}&longitude=${selectedCity.longitude}&hourly=temperature_2m,wind_speed_10m,precipitation_probability,soil_moisture_0_to_1cm&forecast_days=2`),
+          fetch(`https://api.open-meteo.com/v1/forecast?latitude=${selectedCity.latitude}&longitude=${selectedCity.longitude}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,weathercode&timezone=auto&forecast_days=7`),
+        ]);
+        if (active && hourlyRes.ok) {
+          const data = (await hourlyRes.json()) as { hourly?: RawHourlyData };
+          if (data?.hourly) setRawWeather(data.hourly);
+        }
+        if (active && dailyRes.ok) {
+          const data = (await dailyRes.json()) as { daily?: RawDailyData };
+          if (data?.daily) setRawDaily(data.daily);
         }
       } catch (err) {
         console.warn("Open-Meteo sync notice:", err);
@@ -346,10 +351,14 @@ export default function AgRiskDashboard() {
 
     void fetchAsync();
 
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [selectedCity]);
+
+  // Debounced city search
+  useEffect(() => {
+    const timer = setTimeout(() => { void searchCities(searchQuery); }, 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchCities]);
 
   useEffect(() => {
     return () => {
@@ -606,7 +615,107 @@ export default function AgRiskDashboard() {
     return items;
   }, [rawWeather, selectedActivity]);
 
-  // Voice Input (Web Speech API)
+  // Sunrise & Sunset computation (pure math, no external library)
+  const sunTimes = useMemo(() => {
+    const lat = selectedCity.latitude;
+    const lon = selectedCity.longitude;
+    const now = new Date();
+    const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000);
+    const declination = -23.45 * Math.cos((360 / 365) * (dayOfYear + 10) * (Math.PI / 180));
+    const hourAngle = (180 / Math.PI) * Math.acos(-Math.tan(lat * Math.PI / 180) * Math.tan(declination * Math.PI / 180));
+    const utcSunrise = 12 - hourAngle / 15 - lon / 15;
+    const utcSunset = 12 + hourAngle / 15 - lon / 15;
+    const tzOffset = 5.5; // IST offset
+    const sunriseH = ((utcSunrise + tzOffset + 24) % 24);
+    const sunsetH = ((utcSunset + tzOffset + 24) % 24);
+    const fmt = (h: number) => {
+      const hh = Math.floor(h);
+      const mm = Math.floor((h - hh) * 60);
+      const ampm = hh >= 12 ? "PM" : "AM";
+      return `${((hh % 12) || 12).toString().padStart(2,"0")}:${mm.toString().padStart(2,"0")} ${ampm}`;
+    };
+    return { sunrise: fmt(sunriseH), sunset: fmt(sunsetH) };
+  }, [selectedCity]);
+
+  // Moon Phase (lunar cycle ~29.53 days)
+  const moonPhase = useMemo(() => {
+    const now = new Date();
+    const knownNewMoon = new Date("2024-01-11T11:57:00Z");
+    const daysSince = (now.getTime() - knownNewMoon.getTime()) / 86400000;
+    const cycle = ((daysSince % 29.53) + 29.53) % 29.53;
+    if (cycle < 1.85) return { name: "New Moon", emoji: "🌑", illumination: 0 };
+    if (cycle < 7.38) return { name: "Waxing Crescent", emoji: "🌒", illumination: Math.round((cycle / 7.38) * 50) };
+    if (cycle < 9.22) return { name: "First Quarter", emoji: "🌓", illumination: 50 };
+    if (cycle < 14.76) return { name: "Waxing Gibbous", emoji: "🌔", illumination: Math.round(50 + ((cycle - 9.22) / 5.54) * 50) };
+    if (cycle < 16.61) return { name: "Full Moon", emoji: "🌕", illumination: 100 };
+    if (cycle < 22.15) return { name: "Waning Gibbous", emoji: "🌖", illumination: Math.round(100 - ((cycle - 16.61) / 5.54) * 50) };
+    if (cycle < 23.99) return { name: "Last Quarter", emoji: "🌗", illumination: 50 };
+    if (cycle < 29.53) return { name: "Waning Crescent", emoji: "🌘", illumination: Math.round((1 - (cycle - 23.99) / 5.54) * 50) };
+    return { name: "New Moon", emoji: "🌑", illumination: 0 };
+  }, []);
+
+  // Khet Suraksha Alerts (auto-generated from telemetry thresholds)
+  const khetAlerts = useMemo(() => {
+    const { temperature, windSpeed, soilMoisture, precipitationProbability } = currentTelemetry;
+    const alerts: { id: string; severity: "critical" | "warning" | "watch"; icon: LucideIcon; title: string; description: string; }[] = [];
+    if (precipitationProbability > 60 && windSpeed > 12) {
+      alerts.push({ id: "spray-washout", severity: "critical", icon: CloudRain, title: "🚨 Spray Washout Alert", description: `Rain probability ${precipitationProbability}% + Wind ${windSpeed.toFixed(1)} km/h — chemical spray se fasal par coating nahi tikegi. Aaj spraying bilkul mat karein.` });
+    }
+    if (temperature < 5) {
+      alerts.push({ id: "frost", severity: "critical", icon: Zap, title: "❄️ Pala / Frost Alert", description: `Temperature ${temperature.toFixed(1)}°C — frost damage ka khatra hai. Fasal ko plastic sheet se dhaanpein aur drip irrigation chalaayein.` });
+    }
+    if (temperature > 42) {
+      alerts.push({ id: "heatwave", severity: "warning", icon: Thermometer, title: "☀️ Loo / Heatwave Warning", description: `Temperature ${temperature.toFixed(1)}°C — extreme heat se fasal mein wilting aur evapotranspiration badh jayegi. Dopahar spraying band karein.` });
+    }
+    if (soilMoisture > 0.40) {
+      alerts.push({ id: "waterlog", severity: "warning", icon: Droplets, title: "🌊 Waterlogging / Flood Risk", description: `Mitti ki nami ${soilMoisture.toFixed(2)} m³/m³ — root zone me paani bhar sakta hai. Drainage channels saaf karein, tractor mat chalaayein.` });
+    }
+    if (precipitationProbability > 40 && soilMoisture > 0.32) {
+      alerts.push({ id: "irrigation-hold", severity: "watch", icon: AlarmCheck, title: "⚠️ Sinchai Hold Advisory", description: `Barish ${precipitationProbability}% + mitti nami ${soilMoisture.toFixed(2)} m³/m³ — abhi tube-well chalaane se paani aur bijli barbaad hogi.` });
+    }
+    return alerts;
+  }, [currentTelemetry]);
+
+  // 7-Day Agronomic Outlook from daily data
+  const sevenDayOutlook = useMemo(() => {
+    if (!rawDaily || !rawDaily.time || rawDaily.time.length === 0) return [];
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return rawDaily.time.slice(0, 7).map((dateStr, i) => {
+      const date = new Date(dateStr + "T00:00:00");
+      const dayLabel = i === 0 ? "Today" : i === 1 ? "Tomorrow" : days[date.getDay()];
+      const dayNum = date.getDate();
+      const month = months[date.getMonth()];
+      const maxT = Math.round(rawDaily.temperature_2m_max[i] ?? 35);
+      const minT = Math.round(rawDaily.temperature_2m_min[i] ?? 22);
+      const rain = Math.round(rawDaily.precipitation_probability_max[i] ?? 10);
+      const rainMm = (rawDaily.precipitation_sum[i] ?? 0).toFixed(1);
+      const wind = Math.round(rawDaily.wind_speed_10m_max[i] ?? 12);
+      const wc = rawDaily.weathercode[i] ?? 0;
+
+      // Weather description from WMO code
+      let weatherDesc = "Clear sky";
+      if (wc >= 95) weatherDesc = "Thunderstorm";
+      else if (wc >= 80) weatherDesc = "Rain showers";
+      else if (wc >= 61) weatherDesc = "Rain";
+      else if (wc >= 51) weatherDesc = "Drizzle";
+      else if (wc >= 45) weatherDesc = "Foggy";
+      else if (wc >= 3) weatherDesc = "Overcast";
+      else if (wc >= 2) weatherDesc = "Partly cloudy";
+      else if (wc === 1) weatherDesc = "Mainly clear";
+
+      // Agronomy verdict for the day
+      let verdict = "Safe";
+      let verdictColor: "emerald" | "amber" | "rose" = "emerald";
+      let verdictHindi = "Anukool";
+      if (rain > 60 || wind > 20) { verdict = "Hazard"; verdictColor = "rose"; verdictHindi = "Khatarnak"; }
+      else if (rain > 30 || wind > 15) { verdict = "Caution"; verdictColor = "amber"; verdictHindi = "Savdhaan"; }
+
+      return { dayLabel, dateLabel: `${dayNum} ${month}`, maxT, minT, rain, rainMm, wind, weatherDesc, verdict, verdictColor, verdictHindi };
+    });
+  }, [rawDaily]);
+
+
   const toggleVoiceInput = () => {
     if (typeof window === "undefined") return;
 
@@ -711,7 +820,12 @@ export default function AgRiskDashboard() {
   const handleSelectCity = (city: CityLocation) => {
     setSelectedCity(city);
     void fetchOpenMeteo(city.latitude, city.longitude);
+    setShowSearch(false);
+    setSearchQuery("");
+    setSearchResults([]);
   };
+
+  const langLabel = langMode === "hindi" ? "हिंदी" : langMode === "english" ? "English" : "Hinglish";
 
   const getMessageContent = (message: ChatMessage): string => {
     if (typeof message.content === "string" && message.content.length > 0) {
@@ -791,29 +905,100 @@ export default function AgRiskDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          {/* Right side: Search + GPS + Language + Sync */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            {/* City Search Bar */}
+            <div className="relative">
+              {showSearch ? (
+                <div className="flex items-center gap-1.5">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-emerald-400" />
+                    <input
+                      ref={searchInputRef}
+                      autoFocus
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search city or district..."
+                      className="pl-8 pr-3 py-1.5 rounded-lg bg-[#052116] border border-emerald-600/60 text-sm text-white placeholder-emerald-400/50 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400 w-52 transition"
+                    />
+                    {isSearching && <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 animate-spin text-emerald-400" />}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setShowSearch(false); setSearchQuery(""); setSearchResults([]); }}
+                    className="h-8 w-8 rounded-lg bg-[#052116] border border-emerald-700/60 flex items-center justify-center text-emerald-400 hover:text-white transition cursor-pointer"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                  {/* Dropdown results */}
+                  {searchResults.length > 0 && (
+                    <div className="absolute top-full left-0 mt-1.5 w-72 bg-[#062418] border border-emerald-700/60 rounded-xl shadow-xl z-50 overflow-hidden">
+                      <div className="px-3 py-1.5 border-b border-emerald-800/40 flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Search Results</span>
+                        <button type="button" onClick={handleGPS} className="flex items-center gap-1 text-[10px] text-emerald-300 hover:text-white font-semibold cursor-pointer">
+                          <LocateFixed className="h-3 w-3" /> My Farm Location (GPS)
+                        </button>
+                      </div>
+                      {searchResults.map((r) => (
+                        <button
+                          key={r.id}
+                          type="button"
+                          onClick={() => handleSelectCity({ name: r.name, hindiName: r.name, state: r.admin1 ?? r.country, latitude: r.latitude, longitude: r.longitude, zone: r.country })}
+                          className="w-full px-3 py-2.5 text-left hover:bg-emerald-900/50 transition border-b border-emerald-800/30 last:border-0 cursor-pointer"
+                        >
+                          <div className="text-sm font-bold text-white">{r.name}</div>
+                          <div className="text-[11px] text-emerald-300/70">{[r.admin1, r.admin2, r.country].filter(Boolean).join(", ")}</div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => { setShowSearch(true); setTimeout(() => searchInputRef.current?.focus(), 50); }}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#052116] border border-emerald-700/60 text-xs text-emerald-200 font-medium hover:bg-[#0c402b] hover:border-emerald-500 transition cursor-pointer shadow-xs"
+                >
+                  <Search className="h-3.5 w-3.5 text-emerald-400" />
+                  <span className="hidden sm:inline">{selectedCity.name}</span>
+                  <span className="sm:hidden">Search City</span>
+                </button>
+              )}
+            </div>
+
+            {/* GPS Button */}
+            {!showSearch && (
+              <button
+                type="button"
+                onClick={handleGPS}
+                title="Use my GPS farm location"
+                className="h-8 w-8 rounded-lg bg-[#052116] border border-emerald-700/60 flex items-center justify-center text-emerald-400 hover:text-emerald-200 hover:bg-[#0c402b] transition cursor-pointer shadow-xs"
+              >
+                <LocateFixed className="h-3.5 w-3.5" />
+              </button>
+            )}
+
+            {/* Language Switcher */}
+            <button
+              type="button"
+              onClick={() => setLangMode(m => m === "hinglish" ? "hindi" : m === "hindi" ? "english" : "hinglish")}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#052116] border border-emerald-700/60 text-xs font-bold text-emerald-200 hover:bg-[#0c402b] transition cursor-pointer shadow-xs"
+              title="Toggle language"
+            >
+              <Languages className="h-3.5 w-3.5 text-emerald-400" />
+              <span>{langLabel}</span>
+            </button>
+
+            {/* Live Sync Indicator */}
             <motion.div
-              animate={{
-                scale: [1, 1.025, 1],
-                boxShadow: [
-                  "0 0 0 0 rgba(16, 185, 129, 0)",
-                  "0 0 0 3px rgba(16, 185, 129, 0.2)",
-                  "0 0 0 0 rgba(16, 185, 129, 0)",
-                ],
-              }}
+              animate={{ scale: [1, 1.025, 1], boxShadow: ["0 0 0 0 rgba(16, 185, 129, 0)","0 0 0 3px rgba(16, 185, 129, 0.2)","0 0 0 0 rgba(16, 185, 129, 0)"] }}
               transition={{ repeat: Infinity, duration: 2.8, ease: "easeInOut" }}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#083323] border border-emerald-700/50 text-xs text-emerald-100 font-medium shadow-xs"
             >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  isFetchingWeather ? "bg-amber-400 animate-spin" : "bg-emerald-400 animate-pulse"
-                }`}
-              ></span>
-              <span>{isFetchingWeather ? "Syncing Sensors..." : `${selectedCity.name} Live Sync`}</span>
+              <span className={`w-2 h-2 rounded-full ${isFetchingWeather ? "bg-amber-400 animate-spin" : "bg-emerald-400 animate-pulse"}`}></span>
+              <span className="hidden sm:inline">{isFetchingWeather ? "Syncing..." : `${selectedCity.name} Live`}</span>
             </motion.div>
-            <div className="px-3 py-1.5 rounded-lg bg-emerald-900/70 border border-emerald-600/40 text-xs font-semibold text-emerald-200 shadow-xs">
-              Hinglish Kisan Sahayak
-            </div>
           </div>
         </div>
       </motion.header>
@@ -879,6 +1064,36 @@ export default function AgRiskDashboard() {
             </div>
           </div>
         </motion.section>
+
+        {/* 0.5 Khet Suraksha Alert Banners */}
+        {khetAlerts.length > 0 && (
+          <motion.div variants={itemVariants} className="flex flex-col gap-2.5">
+            {khetAlerts.map((alert) => {
+              const Icon = alert.icon;
+              const styles = alert.severity === "critical"
+                ? "bg-rose-950/90 border-rose-700/70 text-rose-100 shadow-rose-950/30"
+                : alert.severity === "warning"
+                ? "bg-amber-950/90 border-amber-700/70 text-amber-100 shadow-amber-950/30"
+                : "bg-[#1a2a10]/90 border-emerald-700/70 text-emerald-100 shadow-emerald-950/30";
+              const iconColor = alert.severity === "critical" ? "text-rose-400" : alert.severity === "warning" ? "text-amber-400" : "text-emerald-400";
+              const badge = alert.severity === "critical" ? "bg-rose-900/80 text-rose-300 border-rose-700/60" : alert.severity === "warning" ? "bg-amber-900/80 text-amber-300 border-amber-700/60" : "bg-emerald-900/80 text-emerald-300 border-emerald-700/60";
+              return (
+                <div key={alert.id} className={`flex items-start gap-3 px-4 py-3 rounded-xl border shadow-sm backdrop-blur-xs ${styles}`}>
+                  <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${iconColor}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-sm">{alert.title}</span>
+                      <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${badge}`}>
+                        {alert.severity === "critical" ? "⚡ Critical" : alert.severity === "warning" ? "⚠ Warning" : "📋 Watch"}
+                      </span>
+                    </div>
+                    <p className="text-xs mt-0.5 opacity-85 leading-relaxed">{alert.description}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </motion.div>
+        )}
 
         {/* 1. Activity Mode Selector */}
         <motion.section
@@ -1222,6 +1437,45 @@ export default function AgRiskDashboard() {
               Lat: {selectedCity.latitude.toFixed(2)}° N &bull; Lon: {selectedCity.longitude.toFixed(2)}° E
             </div>
           </div>
+
+          {/* Card 4: Sunrise, Sunset & Moon Phase */}
+          <div className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-5 shadow-sm flex flex-col justify-between relative overflow-hidden backdrop-blur-xs md:col-span-2 lg:col-span-1">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2 text-emerald-300 font-semibold text-sm">
+                <Sun className="h-5 w-5 text-amber-400" />
+                <span>Suraj Uthna / Doobna & Chand</span>
+              </div>
+              <span className="text-[11px] font-mono bg-[#052116] px-2 py-0.5 rounded border border-emerald-800/60 text-emerald-300">
+                {selectedCity.name}
+              </span>
+            </div>
+
+            {/* Sunrise / Sunset row */}
+            <div className="grid grid-cols-2 gap-2.5 mb-3.5">
+              <div className="bg-gradient-to-br from-amber-950/60 to-[#0a2010] p-3 rounded-xl border border-amber-800/40 text-center">
+                <div className="text-2xl mb-1">🌅</div>
+                <div className="text-[11px] text-amber-300/80 font-bold uppercase tracking-wider">Sunrise</div>
+                <div className="text-lg font-black text-amber-200 mt-0.5">{sunTimes.sunrise}</div>
+              </div>
+              <div className="bg-gradient-to-br from-indigo-950/60 to-[#0a2010] p-3 rounded-xl border border-indigo-800/40 text-center">
+                <div className="text-2xl mb-1">🌇</div>
+                <div className="text-[11px] text-indigo-300/80 font-bold uppercase tracking-wider">Sunset</div>
+                <div className="text-lg font-black text-indigo-200 mt-0.5">{sunTimes.sunset}</div>
+              </div>
+            </div>
+
+            {/* Moon Phase */}
+            <div className="bg-[#052116]/80 rounded-xl border border-emerald-800/50 p-3 flex items-center gap-3">
+              <span className="text-3xl">{moonPhase.emoji}</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-bold text-white">{moonPhase.name}</div>
+                <div className="text-[11px] text-emerald-300/70 mt-0.5">Illumination: {moonPhase.illumination}%</div>
+                <div className="mt-1 h-1.5 rounded-full bg-emerald-900/60 overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-200 transition-all duration-500" style={{ width: `${moonPhase.illumination}%` }} />
+                </div>
+              </div>
+            </div>
+          </div>
         </motion.section>
 
         {/* 3. 24-Hour Risk Timeline Strip */}
@@ -1314,6 +1568,81 @@ export default function AgRiskDashboard() {
               })}
             </div>
           </div>
+        </motion.section>
+
+        {/* 3.5 — 7-Day Agronomic Outlook */}
+        <motion.section
+          variants={itemVariants}
+          className="bg-[#082f20]/85 border border-emerald-800/60 rounded-2xl p-5 shadow-sm backdrop-blur-xs"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div className="flex items-center gap-2">
+              <CalendarCheck className="h-4 w-4 text-emerald-400" />
+              <h3 className="text-sm font-bold text-white">7-Din Agronomic Outlook (Sapt-Aharic Sarvekshan)</h3>
+            </div>
+            <span className="text-xs text-emerald-300/60 font-medium flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+              Open-Meteo 7-Day Daily Forecast
+            </span>
+          </div>
+
+          {sevenDayOutlook.length === 0 ? (
+            <div className="text-center py-6 text-emerald-400/50 text-sm">
+              <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+              Loading 7-day forecast...
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2.5">
+              {sevenDayOutlook.map((day, i) => (
+                <div key={i} className={`flex flex-col gap-2 p-3 rounded-xl border backdrop-blur-xs transition hover:scale-[1.02] ${
+                  day.verdictColor === "rose" ? "bg-rose-950/60 border-rose-800/50" :
+                  day.verdictColor === "amber" ? "bg-amber-950/60 border-amber-800/50" :
+                  "bg-[#052116]/90 border-emerald-800/50"
+                }`}>
+                  {/* Day label */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-black text-white">{day.dayLabel}</div>
+                      <div className="text-[10px] text-emerald-300/70 font-medium">{day.dateLabel}</div>
+                    </div>
+                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded border uppercase tracking-wider ${
+                      day.verdictColor === "rose" ? "bg-rose-900/80 text-rose-300 border-rose-700/60" :
+                      day.verdictColor === "amber" ? "bg-amber-900/80 text-amber-300 border-amber-700/60" :
+                      "bg-emerald-900/80 text-emerald-300 border-emerald-700/60"
+                    }`}>
+                      {day.verdictHindi}
+                    </span>
+                  </div>
+
+                  {/* Weather condition */}
+                  <div className="text-[11px] text-emerald-200/70 font-medium">{day.weatherDesc}</div>
+
+                  {/* Temperature range */}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between text-[11px] font-bold mb-1">
+                      <span className="text-blue-300">{day.minT}°</span>
+                      <span className="text-rose-300">{day.maxT}°</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-gradient-to-r from-blue-500/40 via-emerald-500/40 to-rose-500/40 relative overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-sky-400 to-orange-400 opacity-70" style={{ width: `${Math.min(100, Math.max(20, (day.maxT - day.minT) * 5))}%` }} />
+                    </div>
+                    <div className="text-center text-[10px] text-emerald-300/50 mt-0.5">Temp Range</div>
+                  </div>
+
+                  {/* Rain & Wind */}
+                  <div className="flex items-center justify-between text-[11px] border-t border-emerald-800/30 pt-1.5 gap-1">
+                    <span className={`flex items-center gap-0.5 font-bold ${day.rain > 40 ? "text-blue-400" : "text-emerald-300/70"}`}>
+                      <CloudRain className="h-3 w-3" />{day.rain}%
+                    </span>
+                    <span className="text-emerald-300/50">{day.rainMm}mm</span>
+                    <span className={`flex items-center gap-0.5 font-bold ${day.wind > 15 ? "text-rose-400" : "text-emerald-300/70"}`}>
+                      <Wind className="h-3 w-3" />{day.wind}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </motion.section>
 
         {/* 4. Chat Section */}
